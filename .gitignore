@@ -41,6 +41,9 @@
 *.su
 *.idb
 *.pdb
+EventRecorderStub.scvd
+JLinkLog.txt
+JLinkSettings.ini
 
 # Kernel Module Compile Results
 *.mod*
@@ -51,7 +54,8 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-./vscode/*
+.vscode/*
 *.uvguix.*
-Output/*
-DebugConfig/*
+**/Output/*
+**/DebugConfig/*
+**/RTE/*
