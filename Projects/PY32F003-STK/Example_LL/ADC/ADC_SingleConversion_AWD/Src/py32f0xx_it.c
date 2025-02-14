@@ -86,7 +86,7 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f003xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 /**
   * @brief This function handles ADC_COMP Interrupt .
@@ -95,10 +95,10 @@ void ADC_COMP_IRQHandler(void)
 {
   if(LL_ADC_IsActiveFlag_AWD(ADC1) != 0)
   {
-    /* 清模拟看门狗标志位 */
+    /* Clear analogue watchdog flag bit */
     LL_ADC_ClearFlag_AWD(ADC1);
     
-    /* 模拟看门狗函数回调 */
+    /* Analogue watchdog function callbacks */
     APP_AdcAnalogWatchdogCallback();
   }
 }

@@ -47,7 +47,7 @@ static void APP_GPIOConfig(void);
   */
 int main(void)
 {
-  /* Initialize clock, configure system clock as HSI */
+  /* Initialize clock, configure system clock */
   APP_SystemClockConfig();
  
   /* Initialize GPIO output */
@@ -75,7 +75,14 @@ static void APP_SystemClockConfig(void)
   {
   }
   
+  /* Configure system clock with HSI as clock source of the PLL and initialize it */
   LL_PLL_ConfigSystemClock_HSI(&UTILS_ClkInitStruct);
+  
+  /* Set systick to 1ms */
+  LL_Init1msTick(48000000);
+  
+  /* Update the SystemCoreClock global variable(which can be updated also through SystemCoreClockUpdate function) */
+  LL_SetSystemCoreClock(48000000);
 }
 
 /**

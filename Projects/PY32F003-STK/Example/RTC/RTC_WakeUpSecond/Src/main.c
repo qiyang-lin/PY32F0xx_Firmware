@@ -34,6 +34,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 RTC_HandleTypeDef RtcHandle;
+PWR_StopModeConfigTypeDef PwrStopModeConf = {0};
 
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -41,49 +42,57 @@ RTC_HandleTypeDef RtcHandle;
 static void APP_SystemClockConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 复位所有外设，初始化flash接口和systick.*/
+  /* Reset of all peripherals, Initializes the Systick*/
   HAL_Init();
   
-  /* 系统时钟配置 */
+  /* System clock configuration */
   APP_SystemClockConfig();
   
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  /* 初始化按键BUTTON */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
   
-  /* RTC初始化 */
-  RtcHandle.Instance = RTC;                         /* 选择RTC */
-  RtcHandle.Init.AsynchPrediv = RTC_AUTO_1_SECOND;  /* RTC一秒时基自动计算 */
-  RtcHandle.Init.OutPut = RTC_OUTPUTSOURCE_NONE;   /* TAMPER引脚无输出 */
+  /* RTC initialization */
+  RtcHandle.Instance = RTC;                         /* Select RTC */
+  RtcHandle.Init.AsynchPrediv = RTC_AUTO_1_SECOND;  /* RTC asynchronous prescaler calculated automatically for one second time base */
+  RtcHandle.Init.OutPut = RTC_OUTPUTSOURCE_NONE;   /* No output on the TAMPER pin */
   if (HAL_RTC_Init(&RtcHandle) != HAL_OK)
   {
   }
   
-  /* 点亮小灯 */
+  /* Turn on the LED */
   BSP_LED_On(LED_GREEN);
   
-  /* 等待用户按键按下，主机程序开始运行 */
+  /* Wait for the user to press the button to start the main program */
   while (BSP_PB_GetState(BUTTON_KEY) == 1)
   {
   }
   
-  /* 关闭小灯 */
+  /* Turn off the LED */
   BSP_LED_Off(LED_GREEN);
   
-  /* 关闭systick中断，否则会中断唤醒 */
+  /* Suspend the SysTick interrupt to prevent interrupt waking up the system */
   HAL_SuspendTick();
+
+  /* VCORE = 1.0V  when enter stop mode */
+  PwrStopModeConf.LPVoltSelection       =  PWR_STOPMOD_LPR_VOLT_SCALE2;
+  PwrStopModeConf.FlashDelay            =  PWR_WAKEUP_FLASH_DELAY_5US;
+  PwrStopModeConf.WakeUpHsiEnableTime   =  PWR_WAKEUP_HSIEN_AFTER_MR;
+  PwrStopModeConf.RegulatorSwitchDelay  =  PWR_WAKEUP_LPR_TO_MR_DELAY_2US;
+  PwrStopModeConf.SramRetentionVolt     =  PWR_SRAM_RETENTION_VOLT_VOS;
+  HAL_PWR_ConfigStopMode(&PwrStopModeConf);
   
-  /* 进入STOP模式 */
+  /* Enter STOP mode */
   HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
   
-  /* 打开systick中断 */
+  /* Resume the SysTick interrupt */
   HAL_ResumeTick();
   
   while (1)
@@ -94,9 +103,9 @@ int main(void)
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
@@ -131,13 +140,13 @@ static void APP_SystemClockConfig(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -145,16 +154,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

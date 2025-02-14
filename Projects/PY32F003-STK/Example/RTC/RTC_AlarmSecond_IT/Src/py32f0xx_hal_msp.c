@@ -40,21 +40,21 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化RTC的MSP
+  * @brief  Initialize RTC MSP
   */
 void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc)
 {
   RCC_OscInitTypeDef        RCC_OscInitStruct = {0};
   RCC_PeriphCLKInitTypeDef  PeriphClkInitStruct = {0};
 
-  /* 配置LSI为RTC的时钟源 */
+  /* Configure LSI */
   RCC_OscInitStruct.OscillatorType =  RCC_OSCILLATORTYPE_LSI;
   RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -67,22 +67,21 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc)
   {
   }
 
-  /* 使能RTC的外设时钟 */
+  /* Enable RTC peripheral clock */
   __HAL_RCC_RTCAPB_CLK_ENABLE();
-  /* 使能RTC时钟 */
+  /* Enable RTC clock */
   __HAL_RCC_RTC_ENABLE();
 
-  /* 配置RTC闹钟的NVIC */
+  /* Enable RTC interrupt */
   HAL_NVIC_SetPriority(RTC_IRQn, 0, 0);
-  NVIC_EnableIRQ(RTC_IRQn);
+  HAL_NVIC_EnableIRQ(RTC_IRQn);
 
   __HAL_RTC_OVERFLOW_ENABLE_IT(hrtc, RTC_IT_OW);
-  __HAL_RTC_ALARM_ENABLE_IT(hrtc, RTC_IT_ALRA);
   __HAL_RTC_SECOND_ENABLE_IT(hrtc, RTC_IT_SEC);
 }
 
 /**
-  * @brief 反初始化RTC的MSP
+  * @brief Deinitialize RTC MSP
   */
 void HAL_RTC_MspDeInit(RTC_HandleTypeDef *hrtc)
 {

@@ -33,7 +33,8 @@
 #include "main.h"
 
 /* Private define ------------------------------------------------------------*/
-#define AUTO_BAUD_MODE0    /*自动波特率检测模式选择，从start位开始测量；若屏蔽选择下降沿到下降沿测量*/
+#define AUTO_BAUD_MODE0    /* Automatic baud rate detection mode selection, measuring from the start bit; 
+                              if masked, measure from falling edge to falling edge */
 #define RXBUFFERSIZE  1
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef UartHandle;
@@ -44,47 +45,46 @@ uint8_t submitsum = 0;
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
-void APP_USARTConfig(void);
+static void APP_USARTConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* 系统时钟配置 */
+  /* Initialize USART */
   APP_USARTConfig(); 
 
-  /*通过中断方式接收数据*/
+  /*Receive data using interrupt*/
   if (HAL_UART_Receive_IT(&UartHandle, (uint8_t *)aRxBuffer, 1) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
   while (1)
   {
    if ((__HAL_UART_GET_FLAG(&UartHandle, UART_FLAG_ABRE) == RESET) && \
       (__HAL_UART_GET_FLAG(&UartHandle, UART_FLAG_ABRF) == SET))
     {
-        /*清除自动波特率检测完成标志位*/
+        /*Clear auto baud rate detection complete flag*/
       __HAL_UART_SEND_AUTOBAUD_REQ(&UartHandle);
-       /*发送数据*/
+       /*Send data*/
       HAL_UART_Transmit_IT(&UartHandle, (uint8_t *)aTxBuffer, 18);
     }
   }
 }
 
 /**
-  * @brief  USART配置函数
-  * @param  无
-  * @retval 无
+  * @brief  USART configuration
+  * @param  None
+  * @retval None
   */
-void APP_USARTConfig(void)
+static void APP_USARTConfig(void)
 {
-  /* USART2初始化 */
+  /* Initialize USART2 */
   __HAL_RCC_USART1_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   UartHandle.Instance          = USART1;
@@ -97,30 +97,30 @@ void APP_USARTConfig(void)
   UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
 
   UartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_AUTOBAUDRATE_INIT;
-  UartHandle.AdvancedInit.AutoBaudRateEnable = UART_ADVFEATURE_AUTOBAUDRATE_ENABLE; /* 自动波特率使能 */
+  UartHandle.AdvancedInit.AutoBaudRateEnable = UART_ADVFEATURE_AUTOBAUDRATE_ENABLE; /* Enable auto baud rate */
 #ifdef AUTO_BAUD_MODE0
-  UartHandle.AdvancedInit.AutoBaudRateMode = UART_ADVFEATURE_AUTOBAUDRATE_ONSTARTBIT; /* 自动波特率检测模式从start位开始测量波特率，上位机发送0x7f即可 */                             
+  UartHandle.AdvancedInit.AutoBaudRateMode = UART_ADVFEATURE_AUTOBAUDRATE_ONSTARTBIT; /* Auto baud rate detection mode, measure baud rate from start bit, send 0x7F from host to trigger */                             
 #else
-  UartHandle.AdvancedInit.AutoBaudRateMode = UART_ADVFEATURE_AUTOBAUDRATE_ONFALLINGEDGE; /* 自动波特率检测模式下降沿到下降沿测量，上位机发送0x55即可 */
+  UartHandle.AdvancedInit.AutoBaudRateMode = UART_ADVFEATURE_AUTOBAUDRATE_ONFALLINGEDGE; /* Auto baud rate detection mode, measure baud rate from falling edge to falling edge, send 0x55 from host to trigger */
 #endif
   if (HAL_UART_DeInit(&UartHandle) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
   if (HAL_UART_Init(&UartHandle) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -128,16 +128,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

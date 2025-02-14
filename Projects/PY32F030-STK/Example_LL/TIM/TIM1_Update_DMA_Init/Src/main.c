@@ -58,7 +58,7 @@ int main(void)
   APP_SystemClockConfig();
   
   /* Initialize LED */
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   
   /* Configure and enable DMA */
   APP_ConfigDMATIM1Reload();
@@ -151,7 +151,7 @@ static void APP_ConfigDMATIM1Reload(void)
 void APP_UpdateCallback(void)
 {
   /* Toggle LED */
-  BSP_LED_Toggle(LED3);
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 /**

@@ -40,37 +40,35 @@ uint32_t temp;
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
-void APP_SystemClockConfig(void);
+static void APP_SystemClockConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* 系统时钟配置 */
+  /* System clock configuration */
   APP_SystemClockConfig(); 
 
-  /* 定时器配置 */
-  TimHandle.Instance = TIM16;                                          /* 选择TIM16 */
-  TimHandle.Init.Period            = 3200 - 1;                         /* 自动重装载值 */
-  TimHandle.Init.Prescaler         = 1000 - 1;                         /* 预分频为1000-1 */
-  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* 时钟不分频 */
-  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* 向上计数 */
-  TimHandle.Init.RepetitionCounter = 1 - 1;                            /* 不重复计数 */
-  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;   /* 自动重装载寄存器没有缓冲 */
-  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                         /* TIM16初始化 */
+  TimHandle.Instance = TIM16;                                          /* Select TIM16 */
+  TimHandle.Init.Period            = 3200 - 1;                         /* Auto-reload value */
+  TimHandle.Init.Prescaler         = 1000 - 1;                         /* Prescaler of 1000-1 */
+  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* Clock not divided */
+  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* Up-counting mode */
+  TimHandle.Init.RepetitionCounter = 1 - 1;                            /* No repetition */
+  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;   /* Auto-reload register not buffered */
+  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                         /* Initialize TIM16 */
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)                     /* TIM16使能启动，并使能中断*/
+  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)                     /* Start TIM16 and enable interrupt*/
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
   while (1)
   {
@@ -79,46 +77,46 @@ int main(void)
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  System clock configuration
+  * @param  None
+  * @retval None
   */
-void APP_SystemClockConfig(void)
+static void APP_SystemClockConfig(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /* 振荡器配置 */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI; /* 选择振荡器HSE,HSI,LSI */
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                          /* 开启HSI */
-  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                          /* HSI 1分频 */
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_24MHz; /* 配置HSI时钟24MHz */
-  RCC_OscInitStruct.HSEState = RCC_HSE_OFF;                         /* 关闭HSE */
+  /* Oscillator Configuration */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI; /* Selective Oscillator HSE,HSI,LSI */
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                          /* Enable HSI */
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                          /* HSI not divided */
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_24MHz; /* HSI calibration frequency 24MHz */
+  RCC_OscInitStruct.HSEState = RCC_HSE_OFF;                         /* Disable HSE */
   /*RCC_OscInitStruct.HSEFreq = RCC_HSE_16_24MHz;*/
-  RCC_OscInitStruct.LSIState = RCC_LSI_OFF;                         /* 关闭LSI */
+  RCC_OscInitStruct.LSIState = RCC_LSI_OFF;                         /* Disable LSI */
 
-  /* 配置振荡器 */
+  /* Initialize RCC oscillators */
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 时钟源配置 */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1; /* 选择配置时钟 HCLK,SYSCLK,PCLK1 */
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;         /* 选择HSI作为系统时钟 */
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;             /* AHB时钟 1分频 */
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;              /* APB时钟 1分频 */
-  /* 配置时钟源 */
+  /* Clock Source Configuration */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1; /* RCC system clock types */
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;         /* SYSCLK source is HSI */
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;             /* AHB clock not divided */
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;              /* APB clock not divided */
+  /* Initialize RCC system clock */
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 }
 
 /**
-  * @brief  TIM执行函数，TIM1更新中断后翻转LED
-  * @param  无
-  * @retval 无
+  * @brief  Period elapsed callback in non blocking mode 
+  * @param  None
+  * @retval None
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -126,13 +124,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -140,16 +138,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

@@ -124,7 +124,7 @@ void HSI_Trimming(void)
 
 /**
   * @brief   测量HSI的实际值
-  * @param   无
+  * @param   None
   * @retval  HSI实际频率
   */
 uint32_t HSI_FreqMeasure( void )
@@ -183,8 +183,8 @@ uint32_t HSI_FreqMeasure( void )
 
 /**
   * @brief   HSI测量初始化函数
-  * @param   无
-  * @retval  无
+  * @param   None
+  * @retval  None
   */
 void HSI_MeasurementInit(void)
 {
@@ -198,8 +198,8 @@ void HSI_MeasurementInit(void)
 
 /**
   * @brief   Timer初始化，配置捕获功能，用来测量HSI
-  * @param   无
-  * @retval  无
+  * @param   None
+  * @retval  None
   */void HSI_TIMx_ConfigForCalibration(void)
 {
   TIM_IC_InitTypeDef      ic_config = {0}; /* Timer Input Capture Configuration Structure declaration */
@@ -255,7 +255,7 @@ void HSI_MeasurementInit(void)
 /**
   * @brief   调整所选振荡器的校准值（写入微调位）
   * @param   TrimmingValue：要写入微调位的校准值
-  * @retval  无
+  * @retval  None
   */
 void HSI_RCC_AdjustCalibrationValue(uint32_t TrimmingValue)
 {

@@ -34,48 +34,48 @@
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void APP_SystemClockConfig(void);
+static void APP_SystemClockConfig(void);
 void APP_ConfigEXTI(void);
 void Enter_Sleep(void);
 void GPIO_Config(void);
 static void APP_LED_run(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure system clock */
   APP_SystemClockConfig();
   
-  /* 使能PWR时钟 */
+  /* Enable PWR clock */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
-  /*初始化LED*/
+  /*Initialize LED*/
   BSP_LED_Init(LED_GREEN);
 
-  /*初始化按键*/  
+  /*Initialize button*/  
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
   
-  /*关闭LED*/
+  /* Turn off LED */
   BSP_LED_Off(LED_GREEN);
   
-  /*外部中断初始化*/
+  /* Initialize external interrupt */
   APP_ConfigEXTI();
   
-  /*LED亮*/
+  /* Turn on LED */
   BSP_LED_On(LED_GREEN);
   
   while (BSP_PB_GetState(BUTTON_USER))
   {
   }
   
-  /*LED灭*/
+  /* Turn off LED */
   BSP_LED_Off(LED_GREEN);;
   
-  /*进入SLEEP模式*/
+  /* Enter SLEEP mode */
   Enter_Sleep();
 
   while (1)
@@ -86,23 +86,23 @@ int main(void)
 
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  System clock configuration
+  * @param  None
+  * @retval None
   */
-void APP_SystemClockConfig(void)
+static void APP_SystemClockConfig(void)
 {
- /* HSI使能及初始化 */
+  /* Enable and initialize HSI */
   LL_RCC_HSI_Enable();
   LL_RCC_HSI_SetCalibFreq(LL_RCC_HSICALIBRATION_24MHz);
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
    
-  /* 设置AHB分频*/
+  /* Set AHB prescaler */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
    
-  /* 配置HSISYS为系统时钟及初始化 */
+  /* Configure HSISYS as system clock and initialize it */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
@@ -110,7 +110,7 @@ void APP_SystemClockConfig(void)
   
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
   
-  /*设置APB1分频及初始化*/
+  /* Set APB1 prescaler and initialize it */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
   /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
@@ -118,90 +118,90 @@ void APP_SystemClockConfig(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ConfigEXTI(void)
 {
    LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
    LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
   
-   /*GPIOA时钟使能*/
+   /*Enable GPIOA clock*/
    LL_IOP_GRP1_EnableClock (LL_IOP_GRP1_PERIPH_GPIOA);
   
-   /*选择PA06引脚*/
+   /* Select PA06 pin */
    GPIO_InitStruct.Pin = LL_GPIO_PIN_6;
-   /*选择输入模式*/
+   /* Select input mode */
    GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
-   /*选择上拉*/
+   /*Pull-up*/
    GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-   /*GPIOA初始化*/
+   /* Initialize GPIOA */
    LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-   /*选择EXTI6做外部中断输入*/
+   /* Select EXTI6 as external interrupt input */
    LL_EXTI_SetEXTISource(LL_EXTI_CONFIG_PORTA,LL_EXTI_CONFIG_LINE6);
 
-   /*选择EXTI6*/
+   /* Select EXTI6 */
    EXTI_InitStruct.Line = LL_EXTI_LINE_6;
-   /*使能*/
+   /* Enable */
    EXTI_InitStruct.LineCommand = ENABLE;
-   /*选择中断模式*/
+   /* Select interrupt mode */
    EXTI_InitStruct.Mode = LL_EXTI_MODE_IT;
-   /*选择上升沿触发*/
+   /* Select rising edge trigger */
    EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_RISING;
-   /*外部中断初始化*/
+   /* Initialize external interrupt */
    LL_EXTI_Init(&EXTI_InitStruct);
    
-   /*设置中断优先级*/
+   /* Set interrupt priority */
    NVIC_SetPriority(EXTI4_15_IRQn,1);
-   /*使能中断*/
+   /*Enable interrupts*/
    NVIC_EnableIRQ(EXTI4_15_IRQn);
 }
 
 /**
-  * @brief  进入SLEEP模式
-  * @param  无
-  * @retval 无
+  * @brief  Enter SLEEP mode
+  * @param  None
+  * @retval None
   */
 void Enter_Sleep(void)
 {
-  /*使能PWR时钟*/
+  /*Enable PWR clock*/
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
   
-  /*进入Sleep模式*/
+  /* Enter SLEEP mode */
   LL_LPM_EnableSleep();
   
-  /*等待中断指令*/
+  /*Request Wait For Interrupt*/
   __WFI();
 }
 /**
-  * @brief  LED运行配置
-  * @param  无
-  * @retval 无
+  * @brief  LED run configuration
+  * @param  None
+  * @retval None
   */
 static void APP_LED_run(void)
 {
-  /*翻转LED灯*/
+  /*Toggle LED*/
   BSP_LED_Toggle(LED_GREEN);
-  /*延时200ms*/
+  /*Delay 200ms*/
   LL_mDelay(200);
-  /*翻转LED灯*/
+  /*Toggle LED*/
   BSP_LED_Toggle(LED_GREEN);
-  /*延时200ms*/
+  /*Delay 200ms*/
   LL_mDelay(200);
 }
 
 
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -209,16 +209,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

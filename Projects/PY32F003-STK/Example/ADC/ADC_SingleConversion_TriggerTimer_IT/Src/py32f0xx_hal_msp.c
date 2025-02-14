@@ -40,29 +40,29 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化ADC相关MSP
+  * @brief Initialize ADC-related MSP
   */
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
   GPIO_InitTypeDef          GPIO_InitStruct={0};
 
-  __HAL_RCC_GPIOA_CLK_ENABLE();             /* 使能GPIOA时钟 */
-  __HAL_RCC_ADC_CLK_ENABLE();               /* 使能ADC时钟 */
+  __HAL_RCC_GPIOA_CLK_ENABLE();             /* Enable GPIOA clock */
+  __HAL_RCC_ADC_CLK_ENABLE();               /* Enable ADC clock */
 
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  HAL_NVIC_SetPriority(ADC_COMP_IRQn, 0, 0);/* 中断优先级设置 */
-  HAL_NVIC_EnableIRQ(ADC_COMP_IRQn);        /* ADC中断使能 */
+  HAL_NVIC_SetPriority(ADC_COMP_IRQn, 0, 0);/* Set ADC interrupt priority */
+  HAL_NVIC_EnableIRQ(ADC_COMP_IRQn);        /* Enable ADC interrupt */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

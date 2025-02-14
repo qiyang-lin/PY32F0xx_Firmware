@@ -40,19 +40,19 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief   初始化全局MSP
+  * @brief   Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief   初始TIM相关MSP
+  * @brief   Initialize TIM-related MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
-  __HAL_RCC_TIM3_CLK_ENABLE();/* 使能TIM3时钟 */
-  __HAL_RCC_TIM1_CLK_ENABLE();/* 使能TIM1时钟 */
+  __HAL_RCC_TIM3_CLK_ENABLE();/* Enable TIM3 clock */
+  __HAL_RCC_TIM1_CLK_ENABLE();/* Enable TIM1 clock */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

@@ -93,26 +93,26 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f003xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 void SPI1_IRQHandler(void)
 {
-  /* 检查 ISR 寄存器中的 RXNE 标志值 */
+  /* Check RXNE flag value in ISR register */
   if(LL_SPI_IsActiveFlag_RXNE(SPI1))
   {
-    /* 调用接收回调函数 */
+    /* Calling the receive callback function */
     APP_SpiRxCallback();
   }
-  /* 检查TXE标志 */
+  /* Checking the TXE flag */
   else if(LL_SPI_IsActiveFlag_TXE(SPI1))
   {
-    /* 调用发送回调 */
+    /* Calling the send callback */
     APP_SpiTxCallback();
   }
-  /* 检查 STOP 标志 */
+  /* Checking the STOP flag */
   else if(LL_SPI_IsActiveFlag_OVR(SPI1))
   {
-    /* 调用错误回调 */
+    /* Calling error callbacks */
     APP_SpiTransferErrorCallback();
   }
 }

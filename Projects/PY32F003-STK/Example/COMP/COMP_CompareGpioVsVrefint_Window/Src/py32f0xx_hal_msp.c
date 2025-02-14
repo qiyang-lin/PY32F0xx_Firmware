@@ -40,30 +40,30 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化COMP相关MSP
+  * @brief Initialize COMP-related MSP
   */
 void HAL_COMP_MspInit(COMP_HandleTypeDef *hcomp)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};    
 
-  __HAL_RCC_GPIOA_CLK_ENABLE();                 /* 使能GPIOA时钟 */
-  __HAL_RCC_COMP1_CLK_ENABLE();                 /* 使能COMP1时钟 */
-  __HAL_RCC_COMP2_CLK_ENABLE();                 /* 使能COMP2时钟 */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                 /* Enable GPIOA clock */
+  __HAL_RCC_COMP1_CLK_ENABLE();                 /* Enable COMP1 clock */
+  __HAL_RCC_COMP2_CLK_ENABLE();                 /* Enable COMP2 clock */
 
-  /* PA1配置为模拟输入 */              
+  /* Configure GPIO PA1 as analog input */              
   GPIO_InitStruct.Pin = GPIO_PIN_1;                    
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;            /* 模拟输入 */   
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;               /* 下拉 */
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;            /* Analog mode */   
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;               /* Pull-down */
   HAL_GPIO_Init(GPIOA,  &GPIO_InitStruct);            
   
-  /* PA6和PA7配置为复用 */
+  /* GPIO PA6 and PA7 configured as outputs */
   GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;                   
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;             
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;

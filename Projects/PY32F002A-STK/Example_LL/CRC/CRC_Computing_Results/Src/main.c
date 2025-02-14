@@ -59,34 +59,34 @@ static const uint32_t aDataBuffer[BUFFER_SIZE] =
   0xdf7caf9b, 0xbfba8fd9, 0x9ff86e17, 0x7e364e55, 0x2e933eb2, 0x0ed11ef0
 };
 /* Private function prototypes -----------------------------------------------*/
-void APP_SystemClockConfig(void);
+static void APP_SystemClockConfig(void);
 static uint32_t APP_CalculateCRC(uint32_t pBuffer[],uint32_t BufferLength);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure system clock */
   APP_SystemClockConfig();
 
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
- /*使能CRC模块时钟*/
+  /* Enable CRC module clock */
   LL_AHB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_CRC);
   
-  /*计算CRC值*/
+  /* Calculate CRC value */
   CRCValue=APP_CalculateCRC((uint32_t *)aDataBuffer,BUFFER_SIZE);
   while (1)
   {
-     /*CRC值错误，LED熄灭*/
+    /* CRC value error, turn off LED */
     if (CRCValue != ExpectedCRCValue)
     {
       BSP_LED_Off(LED_GREEN);
     }
-    /*CRC值正确，LED常亮*/
+    /* CRC value correct, turn on LED */
     else
     {
       BSP_LED_On(LED_GREEN);
@@ -95,9 +95,10 @@ int main(void)
 }
 
 /**
-  * @brief  CRC值计算函数.
-  * @param  CRC数组,CRC数组长度
-  * @retval CRC值
+  * @brief  CRC value calculation function
+  * @param  pBuffer：CRC array
+  * @param  BufferLength：Length of the CRC array
+  * @retval CRC value
   */
 static uint32_t APP_CalculateCRC(uint32_t pBuffer[],uint32_t BufferLength)
 {
@@ -105,48 +106,48 @@ static uint32_t APP_CalculateCRC(uint32_t pBuffer[],uint32_t BufferLength)
   {
     LL_CRC_FeedData32(CRC, pBuffer[index]);
   }
-  /* 返回CRC值 */
+  /* Return CRC value */
   return (LL_CRC_ReadData32(CRC));
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  System clock configuration
+  * @param  None
+  * @retval None
   */
-void APP_SystemClockConfig(void)
+static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB prescaler*/
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /*Configure HSISYS as system clock source */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 prescaler*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(8000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(8000000);
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -154,16 +155,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

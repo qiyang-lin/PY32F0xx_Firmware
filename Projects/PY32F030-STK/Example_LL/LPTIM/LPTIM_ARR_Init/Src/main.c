@@ -53,7 +53,7 @@ int main(void)
   APP_SystemClockConfig();
   
   /* Initialize LED */  
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   
   /* Configure and enable LPTIM */
   APP_ConfigLPTIMOneShot();
@@ -87,12 +87,12 @@ static void APP_ConfigLPTIMOneShot(void)
   /* 8000000/64/62500 = 2Hz */
   LL_LPTIM_SetAutoReload(LPTIM1,62500);
   
-  /* Start LPTIM in one-shot mode */
-  LL_LPTIM_StartCounter(LPTIM1,LL_LPTIM_OPERATING_MODE_ONESHOT);
-  
   /* Enable NVIC interrupt request */
   NVIC_EnableIRQ(LPTIM1_IRQn);
   NVIC_SetPriority(LPTIM1_IRQn,0);
+  
+  /* Start LPTIM in one-shot mode */
+  LL_LPTIM_StartCounter(LPTIM1,LL_LPTIM_OPERATING_MODE_ONESHOT);
 }
 
 /**
@@ -103,7 +103,7 @@ static void APP_ConfigLPTIMOneShot(void)
 void APP_LPTIMCallback(void)
 {
   /* Toggle LED */
-  LL_GPIO_TogglePin(GPIOA,LL_GPIO_PIN_11);
+  BSP_LED_Toggle(LED_GREEN);
   
   /* Start LPTIM in one-shot mode */
   LL_LPTIM_StartCounter(LPTIM1,LL_LPTIM_OPERATING_MODE_ONESHOT);

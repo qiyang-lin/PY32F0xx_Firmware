@@ -46,7 +46,7 @@ const uint32_t DATA[64] =
   0x23456789, 0xAAAAAAAA, 0x55555555, 0x23456789, 0xAAAAAAAA, 0x55555555, 0x23456789, 0xAAAAAAAA,
 };
 /* Private function prototypes -----------------------------------------------*/
-void APP_SystemClockConfig(void);
+static void APP_SystemClockConfig(void);
 static void APP_FlashErase(void);
 static void APP_FlashProgram(void);
 static void APP_FlashBlank(void);
@@ -59,8 +59,8 @@ static void APP_FlashVerify(void);
   */
 int main(void)
 {
-  /*初始化systick*/
-  HAL_Init();
+  /*时钟初始化,配置系统时钟为HSI*/
+  APP_SystemClockConfig();
 
   /*初始化按键PB2*/
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
@@ -71,11 +71,10 @@ int main(void)
   /*初始化LED灯PA2*/
   BSP_LED_Init(LED_GREEN);
 
-  /*时钟初始化,配置系统时钟为HSI*/
-  APP_SystemClockConfig();
-
   /*解锁FLASH*/
-  HAL_FLASH_Unlock();
+  LL_FLASH_Unlock(FLASH);
+
+  LL_FLASH_TIMMING_SEQUENCE_CONFIG_24M();
 
   /*擦除FLASH*/
   APP_FlashErase();
@@ -87,7 +86,7 @@ int main(void)
   APP_FlashProgram();
 
   /*锁定FLASH*/
-  HAL_FLASH_Lock();
+  LL_FLASH_Lock(FLASH);
 
   /*校验FLASH*/
   APP_FlashVerify();
@@ -106,18 +105,17 @@ int main(void)
   */
 static void APP_FlashErase(void)
 {
-  uint32_t PAGEError = 0;
-  FLASH_EraseInitTypeDef EraseInitStruct = {0};
-  /*擦写类型FLASH_TYPEERASE_PAGEERASE=Page擦, FLASH_TYPEERASE_SECTORERASE=Sector擦*/
-  EraseInitStruct.TypeErase   = FLASH_TYPEERASE_PAGEERASE;  
-  /*擦写起始地址*/
-  EraseInitStruct.PageAddress = FLASH_USER_START_ADDR;
-  /*需要擦写的页数量*/
-  EraseInitStruct.NbPages  = sizeof(DATA) / FLASH_PAGE_SIZE;
-  /*执行page擦除,PAGEError返回擦写错误的page,返回0xFFFFFFFF,表示擦写成功*/
-  if (HAL_FLASHEx_Erase(&EraseInitStruct, &PAGEError) != HAL_OK)
+  uint32_t flash_program_start = FLASH_USER_START_ADDR ;                /* flash写起始地址 */
+  uint32_t flash_program_end = (FLASH_USER_START_ADDR + sizeof(DATA));  /* flash写结束地址 */
+  
+  while (flash_program_start < flash_program_end)
   {
-    Error_Handler();
+    while(LL_FLASH_IsActiveFlag_BUSY(FLASH)==1);
+    LL_FLASH_EnablePageErase(FLASH);
+    LL_FLASH_SetEraseAddress(FLASH,flash_program_start);
+    while(LL_FLASH_IsActiveFlag_BUSY(FLASH)==1);
+    LL_FLASH_DisablePageErase(FLASH);
+    flash_program_start += FLASH_PAGE_SIZE;                             /* flash起始指针指向下一个page */
   }
 }
 
@@ -128,23 +126,19 @@ static void APP_FlashErase(void)
   */
 static void APP_FlashProgram(void)
 {
-  /*flash写起始地址*/
-  uint32_t flash_program_start = FLASH_USER_START_ADDR ;
-  /*flash写结束地址*/
-  uint32_t flash_program_end = (FLASH_USER_START_ADDR + sizeof(DATA));
-  /*数组指针*/
-  uint32_t *src = (uint32_t *)DATA;
+  uint32_t flash_program_start = FLASH_USER_START_ADDR ;                 /* flash写起始地址 */
+  uint32_t flash_program_end = (FLASH_USER_START_ADDR + sizeof(DATA));   /* flash写结束地址 */
+  uint32_t *src = (uint32_t *)DATA;                                      /* 数组指针 */
 
   while (flash_program_start < flash_program_end)
   {
-    /*执行Program*/
-    if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_PAGE, flash_program_start, src) == HAL_OK)
-    {
-      /*flash起始指针指向第一个page*/
-      flash_program_start += FLASH_PAGE_SIZE; 
-      /*更新数据指针*/
-      src += FLASH_PAGE_SIZE / 4;
-    }
+    while(LL_FLASH_IsActiveFlag_BUSY(FLASH)==1);
+    LL_FLASH_EnablePageProgram(FLASH);
+    LL_FLASH_PageProgram(FLASH,flash_program_start,src);
+    while(LL_FLASH_IsActiveFlag_BUSY(FLASH)==1);
+    LL_FLASH_DisablePageProgram(FLASH);
+    flash_program_start += FLASH_PAGE_SIZE;                              /* flash起始指针指向下一个page */
+    src += FLASH_PAGE_SIZE / 4;                                          /* 更新数据指针 */
   }
 }
 /**
@@ -160,7 +154,7 @@ static void APP_FlashBlank(void)
   {
     if (0xFFFFFFFF != HW32_REG(FLASH_USER_START_ADDR + addr))
     {
-      Error_Handler();
+      APP_ErrorHandler();
     }
     addr += 4;
   }
@@ -178,7 +172,7 @@ static void APP_FlashVerify(void)
   {
     if (DATA[addr / 4] != HW32_REG(FLASH_USER_START_ADDR + addr))
     {
-      Error_Handler();
+      APP_ErrorHandler();
     }
     addr += 4;
   }
@@ -188,8 +182,12 @@ static void APP_FlashVerify(void)
   * @param  无
   * @retval 无
   */
-void APP_SystemClockConfig(void)
+static void APP_SystemClockConfig(void)
 {
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
+
+  /* 设置HSI时钟：24MHz */
+  LL_RCC_HSI_SetCalibFreq(LL_RCC_HSICALIBRATION_24MHz);
   /* 使能HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
@@ -207,10 +205,10 @@ void APP_SystemClockConfig(void)
 
   /* 设置 APB1 分频*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
-  LL_Init1msTick(8000000);
+  LL_Init1msTick(24000000);
 
   /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
-  LL_SetSystemCoreClock(8000000);
+  LL_SetSystemCoreClock(24000000);
 }
 
 /**
@@ -218,7 +216,7 @@ void APP_SystemClockConfig(void)
   * @param  无
   * @retval 无
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
   /* 无限循环 */
   while (1)

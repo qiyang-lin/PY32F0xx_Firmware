@@ -38,10 +38,9 @@
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
 static void APP_SystemClockConfig(void);
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
@@ -50,62 +49,62 @@ int main(void)
 
   HAL_Init();
   
-  /* 使能 LSI */
+  /* Enable LSI */
   APP_SystemClockConfig();
   
-  IwdgHandle.Instance = IWDG;                     /* 选择IWDG */
-  IwdgHandle.Init.Prescaler = IWDG_PRESCALER_32;  /* 配置32分频 */
-  IwdgHandle.Init.Reload = (1024);                /* IWDG计数器重装载值为1024，1s */
+  IwdgHandle.Instance = IWDG;                     /* Select IWDG */
+  IwdgHandle.Init.Prescaler = IWDG_PRESCALER_32;  /* Configure prescaler to 32 */
+  IwdgHandle.Init.Reload = (1024);                /* Set IWDG counter reload value to 1024, 1s */
 
-  if (HAL_IWDG_Init(&IwdgHandle) != HAL_OK)        /* 初始化IWDG */
+  if (HAL_IWDG_Init(&IwdgHandle) != HAL_OK)        /* Initialize IWDG */
   {
 
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
   while (1)
   {
 
-    HAL_Delay(900);                                   /* 每900ms喂一次狗，可以正常运行 */
-       /* HAL_Delay(1100);*/                            /* 每1.1s喂一次狗，无法正常运行 */
-    /* 翻转LED灯 */
-    BSP_LED_Toggle(LED_GREEN);                        /* 翻转LED */
-    /*喂狗*/
+    HAL_Delay(900);                                   /* Feed the watchdog every 900ms, it can run normally */
+       /* HAL_Delay(1100);*/                            /* Feed the watchdog every 1.1s, it cannot run properly */
+
+    BSP_LED_Toggle(LED_GREEN);                        /* Toggle LED */
+    /* Refresh the watchdog */
     if (HAL_IWDG_Refresh(&IwdgHandle) != HAL_OK)
     {
-      Error_Handler();
+      APP_ErrorHandler();
     }
   }
 }
 
 /**
-  * @brief  系统时钟配置
-  * @param  无
-  * @retval 无
+  * @brief  System clock configuration
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
 
-  /* 时钟源配置 */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI ; /* 选择 LSI */
-  RCC_OscInitStruct.LSIState       = RCC_LSI_ON;              /* 使能 LSI */
-  /* 配置时钟源 */
+  /* Clock Source Configuration */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI ; /* Select configure LSI */
+  RCC_OscInitStruct.LSIState       = RCC_LSI_ON;              /* Enable LSI */
+  /* Initialize RCC system clock */
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -113,16 +112,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

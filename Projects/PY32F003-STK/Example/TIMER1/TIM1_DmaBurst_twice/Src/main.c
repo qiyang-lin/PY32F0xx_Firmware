@@ -44,35 +44,35 @@ static void APP_SystemClockConfig(void);
 static void APP_GpioPortInit(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  /* 初始化GPIO */
+  /* Initialize GPIO */
   APP_GpioPortInit();
   
-  /* 系统时钟配置 */
+  /* System clock configuration */
   APP_SystemClockConfig();
   
-  TimHandle.Instance = TIM1;                                           /* 选择TIM1 */
-  TimHandle.Init.Period            = 6400 - 1;                         /* 自动重装载值 */
-  TimHandle.Init.Prescaler         = 1000 - 1;                         /* 预分频为1000-1 */
-  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* 时钟不分频 */
-  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* 向上计数 */
-  TimHandle.Init.RepetitionCounter = 1 - 1;                            /* 不重复计数 */
-  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;    /* 自动重装载寄存器缓冲使能 */
-  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                         /* TIM1初始化 */
+  TimHandle.Instance = TIM1;                                           /* Select TIM1 */
+  TimHandle.Init.Period            = 6400 - 1;                         /* Auto-reload value */
+  TimHandle.Init.Prescaler         = 1000 - 1;                         /* Prescaler */
+  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* No clock division */
+  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* Up counting */
+  TimHandle.Init.RepetitionCounter = 1 - 1;                            /* No repetition counting */
+  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;    /* Enable auto-reload register preload */
+  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                         /* Initialize TIM1 */
   {
     APP_ErrorHandler();
   }
-  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)                     /* TIM1使能启动，并使能中断 */
+  if (HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)                     /* Start the TIM Base generation in interrupt mode */
   {
     APP_ErrorHandler();
   }
@@ -85,26 +85,26 @@ int main(void)
 }
 
 /**
-  * @brief   初始化GPIOA0
-  * @param   无
-  * @retval  无
+  * @brief   Initialize GPIO PA0
+  * @param   None
+  * @retval  None
   */
 static void APP_GpioPortInit(void)
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
-  __HAL_RCC_GPIOA_CLK_ENABLE();                   /* 使能GPIOA时钟 */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                   /* Enable GPIOA clock */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;     /* 推挽输出 */
-  GPIO_InitStruct.Pull = GPIO_NOPULL;             /* 无上拉和下拉 */
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;     /* Push-pull output */
+  GPIO_InitStruct.Pull = GPIO_NOPULL;             /* No pull-up or pull-down */
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);         /* 初始化GPIO */
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);         /* Initialize GPIO */
 }
 
 /**
-  * @brief   TIM更新中断回调函数
-  * @param   htim：TIM句柄
-  * @retval  无
+  * @brief   Period elapsed callback in non blocking mode 
+  * @param   htim：TIM handle
+  * @retval  None
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -112,65 +112,64 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /*配置时钟源HSE/HSI/LSI*/
+  /*Oscillator configuration*/
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                                      /* 开启HSI */
-  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                                                      /* 不分频 */
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_16MHz;                             /* 配置HSI输出时钟为16MHz */
-  RCC_OscInitStruct.HSEState = RCC_HSE_OFF;                                                     /* 关闭HSE */
-  RCC_OscInitStruct.HSEFreq = RCC_HSE_16_32MHz;                                                 /* HSE晶振工作频率16M~32M */
-  RCC_OscInitStruct.LSIState = RCC_LSI_OFF;                                                     /* 关闭LSI */
-  /* 初始化RCC振荡器 */
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                                      /* Enable HSI */
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                                                      /* No HSI division */
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_16MHz;                             /* Configure HSI output clock as 16MHz */
+  RCC_OscInitStruct.HSEState = RCC_HSE_OFF;                                                     /* Disable HSE */
+  RCC_OscInitStruct.HSEFreq = RCC_HSE_16_32MHz;                                                 /* HSE frequency range 16M~32M */
+  RCC_OscInitStruct.LSIState = RCC_LSI_OFF;                                                     /* Disable LSI */
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     APP_ErrorHandler();
   }
 
-  /* 初始化CPU,AHB,APB总线时钟 */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1; /* RCC系统时钟类型 */
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                                         /* SYSCLK的源选择为HSI */
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                                             /* APH时钟不分频 */
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                                              /* APB时钟不分频 */
+  /* Initialize CPU, AHB, and APB bus clocks */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1; /* RCC system clock types */
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                                         /* SYSCLK source is HSI */
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                                             /* AHB clock not divided */
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                                              /* APB clock not divided */
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)                        /* 初始化RCC系统时钟(FLASH_LATENCY_0=24M以下;FLASH_LATENCY_1=48M) */
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)                        /* Initialize RCC system clock (FLASH_LATENCY_0=up to 24MHz; FLASH_LATENCY_1=up to 48MHz) */
   {
     APP_ErrorHandler();
   }
 }
 
 /**
-  * @brief   错误执行函数
-  * @param   无
-  * @retval  无
+  * @brief   This function is executed in case of error occurrence.
+  * @param   None
+  * @retval  None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

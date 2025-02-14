@@ -96,10 +96,10 @@ void RTC_IRQHandler(void)
 {
   if ((LL_RTC_IsActiveFlag_ALR(RTC) != 0)&& (LL_RTC_IsEnabledIT_ALR(RTC) != 0))
   {
-    /* 打开LED灯 */
+    /* Turn on LED */
     BSP_LED_On(LED_GREEN);
 
-    /* 清除闹钟标志位 */
+    /* Clear the alarm flag bit */
     LL_RTC_ClearFlag_ALR(RTC);
   }
 }

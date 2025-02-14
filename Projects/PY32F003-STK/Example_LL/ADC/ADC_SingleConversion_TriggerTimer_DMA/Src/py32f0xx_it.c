@@ -86,7 +86,7 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f003xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 /**
   * @brief This function handles DMA1_Channel1 Interrupt .
@@ -95,7 +95,7 @@ void DMA1_Channel1_IRQHandler(void)
 {
   if(LL_DMA_IsActiveFlag_TC1(DMA1) == 1)
   {
-    /*清DMA传输完成标志*/
+    /*Clear DMA transfer completion flag*/
     LL_DMA_ClearFlag_TC1(DMA1);
     APP_TransferCompleteCallback();
   }

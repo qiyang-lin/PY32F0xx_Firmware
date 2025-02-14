@@ -33,61 +33,34 @@
 #include "main.h"
 
 /* Private define ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+#define TXSTARTMESSAGESIZE    (COUNTOF(aTxStartMessage) - 1)
+#define TXENDMESSAGESIZE      (COUNTOF(aTxEndMessage) - 1)
+
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef UartHandle;
-uint8_t aTxBuffer[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+uint8_t aTxStartMessage[] = "\r\n UART Hyperterminal communication based on Polling\r\n Enter 12 characters using keyboard :\r\n";
+uint8_t aTxEndMessage[] = "\r\n Example Finished\r\n";
 uint8_t aRxBuffer[12] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-__IO ITStatus UartReady = RESET;
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
-void APP_USARTConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* 系统时钟配置 */
-  APP_USARTConfig(); 
-
-  /*通过中断方式接收数据*/
-  if (HAL_UART_Transmit(&UartHandle, (uint8_t *)aTxBuffer, 12,5000) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  while (1)
-  {
-     /*通过POLLING方式接收数据*/
-    if (HAL_UART_Receive(&UartHandle, (uint8_t *)aRxBuffer, 12, 5000) != HAL_OK)
-    {
-      Error_Handler();
-    }
-
-    /*通过POLLING方式发送数据*/
-    if (HAL_UART_Transmit(&UartHandle, (uint8_t *)aRxBuffer, 12, 5000) != HAL_OK)
-    {
-      Error_Handler();
-    }
-  }
-}
-
-/**
-  * @brief  USART配置函数
-  * @param  无
-  * @retval 无
-  */
-void APP_USARTConfig(void)
-{
-  /* USART1初始化 */
-  __HAL_RCC_USART1_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
+  /* Initialize LED */
+  BSP_LED_Init(LED_GREEN);
+  
+  /* Initialize USART */
   UartHandle.Instance          = USART1;
   UartHandle.Init.BaudRate     = 115200;
   UartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
@@ -97,25 +70,51 @@ void APP_USARTConfig(void)
   UartHandle.Init.Mode         = UART_MODE_TX_RX;
   UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
   UartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-
-  if (HAL_UART_DeInit(&UartHandle) != HAL_OK)
-  {
-    Error_Handler();
-  }
   if (HAL_UART_Init(&UartHandle) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
+  }
+  
+  /* Start the transmission process */
+  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aTxStartMessage, TXSTARTMESSAGESIZE, 5000)!= HAL_OK)
+  {
+    APP_ErrorHandler();
+  }
+
+  /* Put UART peripheral in reception process */
+  if(HAL_UART_Receive(&UartHandle, (uint8_t *)aRxBuffer, 12, 5000) != HAL_OK)
+  {
+    APP_ErrorHandler();
+  }
+  
+  /* Send the received Buffer */
+  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aRxBuffer, 12, 5000)!= HAL_OK)
+  {
+    APP_ErrorHandler();
+  }
+
+  /* Send the End Message */
+  if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aTxEndMessage, TXENDMESSAGESIZE, 5000)!= HAL_OK)
+  {
+    APP_ErrorHandler();
+  }
+
+  /* Turn on LED */
+  BSP_LED_On(LED_GREEN);
+  
+  while (1)
+  {
   }
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -123,16 +122,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

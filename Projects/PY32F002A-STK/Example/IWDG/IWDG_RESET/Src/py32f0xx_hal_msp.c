@@ -33,7 +33,7 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {

@@ -153,24 +153,7 @@
           <Name>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0PY32F030xx_64 -FS08000000 -FL010000 -FP0($$Device:PY32F030x8$Flash\PY32F030xx_64.FLM))</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint>
-        <Bp>
-          <Number>0</Number>
-          <Type>0</Type>
-          <LineNumber>87</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134220382</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\wanglanzhuo\Desktop\PY32F0xx_Firmware\Projects\PY32F030-STK\Example_LL\TIM\TIM1_PWM_Init - 鍓湰\Src\py32f0xx_it.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Target\../Src/py32f0xx_it.c\87</Expression>
-        </Bp>
-      </Breakpoint>
+      <Breakpoint/>
       <Tracepoint>
         <THDelay>0</THDelay>
       </Tracepoint>

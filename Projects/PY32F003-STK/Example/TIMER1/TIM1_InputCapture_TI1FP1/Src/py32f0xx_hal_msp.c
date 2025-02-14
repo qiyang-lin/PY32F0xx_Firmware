@@ -40,21 +40,21 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始TIM相关MSP
+  * @brief Initialize TIM-related MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
   GPIO_InitTypeDef   GPIO_InitStruct = {0};
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_TIM1_CLK_ENABLE();                     /* TIM1时钟使能 */
-  /*GPIOA3初始化为TIM1_CH1*/
+  __HAL_RCC_TIM1_CLK_ENABLE();                     /* Enable TIM1 clock */
+  /*Initialize GPIOA3 as TIM1_CH1*/
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -62,8 +62,8 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
   GPIO_InitStruct.Alternate = GPIO_AF13_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  HAL_NVIC_SetPriority(TIM1_CC_IRQn, 3, 0);        /* 设置中断优先级 */
-  HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);                /* 中断使能 */
+  HAL_NVIC_SetPriority(TIM1_CC_IRQn, 3, 0);        /* Set interrupt priority */
+  HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);                /* Enable interrupt */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

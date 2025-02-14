@@ -34,6 +34,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 RTC_HandleTypeDef RtcHandle;
+PWR_StopModeConfigTypeDef PwrStopModeConf = {0};
 
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -79,6 +80,14 @@ int main(void)
   
   /* Suspend the SysTick interrupt to prevent interrupt waking up the system */
   HAL_SuspendTick();
+
+  /* VCORE = 1.0V  when enter stop mode */
+  PwrStopModeConf.LPVoltSelection       =  PWR_STOPMOD_LPR_VOLT_SCALE2;
+  PwrStopModeConf.FlashDelay            =  PWR_WAKEUP_FLASH_DELAY_5US;
+  PwrStopModeConf.WakeUpHsiEnableTime   =  PWR_WAKEUP_HSIEN_AFTER_MR;
+  PwrStopModeConf.RegulatorSwitchDelay  =  PWR_WAKEUP_LPR_TO_MR_DELAY_2US;
+  PwrStopModeConf.SramRetentionVolt     =  PWR_SRAM_RETENTION_VOLT_VOS;
+  HAL_PWR_ConfigStopMode(&PwrStopModeConf);
   
   /* Enter STOP mode */
   HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);

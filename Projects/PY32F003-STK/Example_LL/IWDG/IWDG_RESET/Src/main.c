@@ -41,51 +41,51 @@ static void APP_SystemClockConfig(void);
 static void APP_IwdgConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 时钟初始化,配置系统时钟为HSI */
+  /* Configure system clock */
   APP_SystemClockConfig();
 
-  /* LED初始化 */
-  BSP_LED_Init(LED3);
+  /* Initialize LED */
+  BSP_LED_Init(LED_GREEN);
 
-  /* IWDG配置 */
+  /* IWDG configuration */
   APP_IwdgConfig();
 
   while (1)
   {
-    /* 延时时间 */
+    /* Delay time */
     LL_mDelay(900);
     /* LL_mDelay(1100); */
 
-    /* LED翻转 */
-    BSP_LED_Toggle(LED3);
+    /* Toggle LED */
+    BSP_LED_Toggle(LED_GREEN);
 
-    /* 喂狗 */
+    /* Feed the watchdog */
     LL_IWDG_ReloadCounter(IWDG);
   }
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* HSI使能及初始化 */
+  /* Enable and initialize HSI */
   LL_RCC_HSI_Enable();
   while (LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置AHB分频*/
+  /* Set AHB frequency division*/
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS为系统时钟及初始化 */
+  /* HSISYS used as SYSCLK clock source */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
@@ -93,51 +93,51 @@ static void APP_SystemClockConfig(void)
 
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
 
-  /* 设置APB1分频及初始化 */
+  /* Set APB1 divider */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(8000000);
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(8000000);
 }
 
 /**
-  * @brief  IWDG配置
-  * @param  无
-  * @retval 无
+  * @brief  IWDG configuration
+  * @param  None
+  * @retval None
   */
 void APP_IwdgConfig(void)
 {
-  /* 使能LSI */
+  /* Enable LSI */
   LL_RCC_LSI_Enable();
   while (LL_RCC_LSI_IsReady() == 0U) {;}
 
-  /* 使能IWDG */
+  /* Enable IWDG */
   LL_IWDG_Enable(IWDG);
   
-  /* 开启写权限 */
+  /* Enable write access */
   LL_IWDG_EnableWriteAccess(IWDG);
   
-  /* 设置IWDG分频 */
+  /* Set IWDG prescaler */
   LL_IWDG_SetPrescaler(IWDG, LL_IWDG_PRESCALER_32); 
   
-  /* 设置喂狗事件*/
+  /* Set watchdog reload counter*/
   LL_IWDG_SetReloadCounter(IWDG, 1024); /* T*1024=1s */
   
-  /* IWDG初始化*/
+  /* IWDG initialization */
   while (LL_IWDG_IsReady(IWDG) == 0U) {;}
   
-  /*喂狗*/
+  /* Feed watchdog */
   LL_IWDG_ReloadCounter(IWDG);
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -145,16 +145,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

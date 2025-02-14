@@ -55,7 +55,7 @@ int main(void)
   APP_SystemClockConfig();
   
   /* Initialize LED, USART */
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   BSP_USART_Config();
   
   /* Enable TIM1 */

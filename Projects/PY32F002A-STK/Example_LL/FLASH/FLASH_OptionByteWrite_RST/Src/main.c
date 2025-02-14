@@ -27,21 +27,18 @@
   *
   ******************************************************************************
   */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "py32f002xx_ll_Start_Kit.h"
 
 /* Private define ------------------------------------------------------------*/
-#define RSTPIN_MODE_GPIO
-/* #define RSTPIN_MODE_RST */
+/* #define OB_GPIO_PIN_MODE LL_FLASH_NRST_MODE_RESET */
+#define OB_GPIO_PIN_MODE LL_FLASH_NRST_MODE_GPIO
 
 /* Private variables ---------------------------------------------------------*/
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-static void APP_SystemClockConfig(void);
-static void APP_FlashOBProgram(void);
+void APP_SystemClockConfig(void);
 
 /**
   * @brief  Main program.
@@ -49,11 +46,12 @@ static void APP_FlashOBProgram(void);
   */
 int main(void)
 {
-  /* Initialize clock, configure system clock as HSI */
+  /* Configure Systemclock */
   APP_SystemClockConfig();
   
-  /* Initialize SysTick */
-  HAL_Init();
+  /* Enable SYSCFG and PWR clocks */
+  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SYSCFG);
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
   /* Initialize LED */  
   BSP_LED_Init(LED_GREEN);
@@ -62,100 +60,48 @@ int main(void)
   BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
   
   /* Wait for button press */
-  while (BSP_PB_GetState(BUTTON_USER))
+  while (BSP_PB_GetState(BUTTON_KEY))
   {
   }
-
-  /* Check RST pin configuration */
-#if defined(RSTPIN_MODE_GPIO)
-  if( READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE) == OB_RESET_MODE_RESET)
-#else
-  if( READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE) == OB_RESET_MODE_GPIO)
-#endif
+  
+  /* Check RST pin mode */
+  if(LL_FLASH_GetNrstMode(FLASH) != OB_GPIO_PIN_MODE)
   {
-    /* Program OPTION bytes */
-    APP_FlashOBProgram();
+    /* Unlock Flash */
+    LL_FLASH_Unlock(FLASH);
+  
+    /* Unlock Option */
+    LL_FLASH_OBUnlock(FLASH);
+
+    LL_FLASH_TIMMING_SEQUENCE_CONFIG_24M();
+
+    /* Set PF2 GPIO Mode */
+    LL_FLASH_SetOPTR(FLASH,LL_FLASH_BOR_DISABLE,LL_FLASH_BOR_LEV0,LL_FLASH_NBOOT1_CLR,LL_FLASH_IWDG_MODE_SW, \
+                           OB_GPIO_PIN_MODE,LL_FLASH_RDP_LEVEL_0);
+
+    LL_FLASH_EnableOptionProgramStart(FLASH);
+    LL_FLASH_TriggerOptionProgramStart(FLASH);
+    
+    while(LL_FLASH_IsActiveFlag_BUSY(FLASH)==1);
+    
+    /* Lock Option */
+    LL_FLASH_OBLock(FLASH);
+    
+    /* Lock Flash */
+    LL_FLASH_Lock(FLASH);
+
+    /* Launch */
+    LL_FLASH_Launch(FLASH);
+  }
+  else
+  {
+    BSP_LED_On(LED_GREEN);
   }
 
   while (1)
   {
-#if defined(RSTPIN_MODE_GPIO)
-    if(READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE)== OB_RESET_MODE_GPIO )
-#else
-    if(READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE)== OB_RESET_MODE_RESET )
-#endif
-    {
-      BSP_LED_On(LED_GREEN);
-      while(1)
-      {
-      }
-    }
+
   }
-}
-
-/**
-  * @brief  System clock configuration function
-  * @param  None
-  * @retval None
-  */
-static void APP_SystemClockConfig(void)
-{
-  /* Enable and initialize HSI */
-  LL_RCC_HSI_Enable();
-  LL_RCC_HSI_SetCalibFreq(LL_RCC_HSICALIBRATION_24MHz);
-  while (LL_RCC_HSI_IsReady() != 1)
-  {
-  }
-
-  /* Set AHB prescaler*/
-  LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
-
-  /* Configure HSISYS as system clock and initialize it */
-  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
-  while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
-  {
-  }
-
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-
-  /* Set APB1 prescaler and initialize it */
-  LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
-  /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
-  LL_SetSystemCoreClock(24000000);
-}
-
-/**
-  * @brief  Program OPTION bytes
-  * @param  None
-  * @retval None
-  */
-static void APP_FlashOBProgram(void)
-{
-  FLASH_OBProgramInitTypeDef OBInitCfg = {0};
-
-  HAL_FLASH_Unlock();         /* Unlock FLASH */
-  HAL_FLASH_OB_Unlock();      /* Unlock OPTION bytes */
-
-  /* Configure OPTION bytes */
-  OBInitCfg.OptionType = OPTIONBYTE_USER;
-  OBInitCfg.USERType = OB_USER_BOR_EN | OB_USER_BOR_LEV | OB_USER_IWDG_SW | OB_USER_NRST_MODE | OB_USER_nBOOT1;
-
-#if defined(RSTPIN_MODE_GPIO)
-  /* BOR disabled / BOR rising threshold 3.2V, falling threshold 3.1V / Software watchdog enabled / GPIO function / System memory as boot area */
-  OBInitCfg.USERConfig = OB_BOR_DISABLE | OB_BOR_LEVEL_3p1_3p2 | OB_IWDG_SW | OB_RESET_MODE_GPIO | OB_BOOT1_SYSTEM;
-#else
-  /* BOR disabled / BOR rising threshold 3.2V, falling threshold 3.1V / Software watchdog enabled / Reset pin function / System memory as boot area */
-  OBInitCfg.USERConfig = OB_BOR_DISABLE | OB_BOR_LEVEL_3p1_3p2 | OB_IWDG_SW | OB_RESET_MODE_RESET | OB_BOOT1_SYSTEM;
-#endif
-
-  /* Start OPTION byte programming */
-  HAL_FLASH_OBProgram(&OBInitCfg);
-
-  HAL_FLASH_Lock();          /* Lock FLASH */
-  HAL_FLASH_OB_Lock();       /* Lock OPTION bytes */
-
-  /* Generate a reset to load the option bytes */
-  HAL_FLASH_OB_Launch();
 }
 
 /**
@@ -165,7 +111,44 @@ static void APP_FlashOBProgram(void)
   */
 void APP_ErrorHandler(void)
 {
-  while (1);
+  while (1)
+  {
+  }
+}
+
+/**
+  * @brief  Configure Systemclock
+  * @param  None
+  * @retval None
+  */
+void APP_SystemClockConfig(void)
+{
+  /*  Set FLASH Latency Before modifying the HSI */
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
+
+  /* SET HSI to 24MHz */
+  LL_RCC_HSI_SetCalibFreq(LL_RCC_HSICALIBRATION_24MHz);
+  /* Enable HSI */
+  LL_RCC_HSI_Enable();
+  while(LL_RCC_HSI_IsReady() != 1)
+  {
+  }
+
+  /* Set AHB divider:HCLK = SYSCLK */
+  LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+
+  /* HSISYS used as SYSCLK clock source */
+  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
+  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
+  {
+  }
+
+  /* Set APB1 divider */
+  LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+  LL_Init1msTick(24000000);
+
+  /* Update CMSIS variable (which can be updated also through SystemCoreClockUpdate function) */
+  LL_SetSystemCoreClock(24000000);
 }
 
 #ifdef  USE_FULL_ASSERT
@@ -179,7 +162,8 @@ void APP_ErrorHandler(void)
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* User can add his own implementation to report the file name and line number,
-     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+
   /* Infinite loop */
   while (1)
   {

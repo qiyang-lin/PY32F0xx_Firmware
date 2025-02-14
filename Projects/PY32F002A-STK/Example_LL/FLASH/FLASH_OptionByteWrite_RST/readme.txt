@@ -14,7 +14,8 @@ IAR版本： 9.20
 1. 编译下载程序到MCU，并运行；
 2. 将MCU断电并重新上电；
 3. 按下按键，RST键变为GPIO功能，LED点亮；
-4. 注释掉"RSTPIN_MODE_GPIO",打开"RSTPIN_MODE_RST",编译重新下载到MCU;
+4. 注释掉"#define OB_GPIO_PIN_MODE LL_FLASH_NRST_MODE_GPIO",
+   打开"#define OB_GPIO_PIN_MODE LL_FLASH_NRST_MODE_RESET",编译重新下载到MCU;
 5. 将MCU断电并重新上电；
 6. 按下按键，RST键变为RESET功能，LED点亮；
 

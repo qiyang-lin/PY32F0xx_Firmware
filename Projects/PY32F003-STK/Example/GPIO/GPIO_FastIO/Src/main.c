@@ -51,8 +51,8 @@ static void APP_GpioInit(void);
 static void APP_SystemClockConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
@@ -61,18 +61,18 @@ int main(void)
   uint32_t u32High = 0x00000020;
   uint32_t u32Low  = 0x00200000;
   
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();  
   
-  /* 初始化GPIO */
+  /* Initialize GPIO */
   APP_GpioInit();                                 
   
-  /* 配置系统时钟 */
+  /* Configure system clock */
   APP_SystemClockConfig();                         
   
   while (1)
   {
-    /* LED 翻转输出约12MHz */
+    /* Toggle LED output approximately 12MHz */
     APP_GPIO_TOGGLE();
     APP_GPIO_TOGGLE();
     APP_GPIO_TOGGLE();
@@ -87,57 +87,57 @@ int main(void)
 }
 
 /**
-  * @brief  GPIO初始化
-  * @param  无
-  * @retval 无
+  * @brief  Initialize GPIO
+  * @param  None
+  * @retval None
   */
 static void APP_GpioInit()
 {
   GPIO_InitTypeDef  GPIO_InitStruct = {0};
 
-  __HAL_RCC_GPIOB_CLK_ENABLE();                          /* GPIOB时钟使能 */
+  __HAL_RCC_GPIOB_CLK_ENABLE();                          /* Enable GPIOB clock */
 
-  /* 初始化GPIOB5 */
+  /* Initialize GPIO PB5 */
   GPIO_InitStruct.Pin = GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;            /* 推挽输出 */
-  GPIO_InitStruct.Pull = GPIO_PULLUP;                    /* 使能上拉 */
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;     /* GPIO速度 */
-  /* GPIO初始化 */
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;            /* Push-pull output */
+  GPIO_InitStruct.Pull = GPIO_PULLUP;                    /* Pull-up */
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;     /* GPIO speed */
+  /* Initialize GPIO */
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);                
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /* 配置时钟源HSI */
+  /* Configure clock source HSI */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                                       /* 开启HSI */
-  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                                                       /* 不分频 */
-  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_4MHz; */                         /* 配置HSI输出时钟为4MHz */
-  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_8MHz; */                         /* 配置HSI输出时钟为8MHz */
-  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_16MHz; */                        /* 配置HSI输出时钟为16MHz */
-  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_22p12MHz; */                     /* 配置HSI输出时钟为22.12MHz */
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_24MHz;                              /* 配置HSI输出时钟为24MHz */
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                                       /* Enable HSI */
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                                                       /* No HSI division */
+  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_4MHz; */                         /* Configure HSI output clock as 4MHz */
+  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_8MHz; */                         /* Configure HSI output clock as 8MHz */
+  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_16MHz; */                        /* Configure HSI output clock as 16MHz */
+  /* RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_22p12MHz; */                     /* Configure HSI output clock as 22.12MHz */
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_24MHz;                              /* Configure HSI output clock as 24MHz */
 
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)                                           /* 初始化RCC振荡器 */
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)                                           /* Initialize RCC oscillators */
   {
     APP_ErrorHandler();
   }
 
-  /* 初始化CPU,AHB,APB总线时钟 */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;  /* RCC系统时钟类型 */
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                                          /* SYSCLK的源选择为HSI */
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                                              /* AHB时钟不分频 */
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                                               /* APB时钟不分频 */
+  /* Initialize CPU, AHB, APB bus clocks */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;  /* RCC system clock types */
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                                          /* SYSCLK source is HSI */
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                                              /* AHB clock not divided */
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                                               /* APB clock not divided */
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)                         /* 初始化RCC系统时钟(FLASH_LATENCY_0=24M以下;FLASH_LATENCY_1=48M) */
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)                         /* Initialize RCC system clock (FLASH_LATENCY_0=up to 24MHz; FLASH_LATENCY_1=up to 48MHz) */
   {
     APP_ErrorHandler();
   }
@@ -145,13 +145,13 @@ static void APP_SystemClockConfig(void)
 
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -159,16 +159,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

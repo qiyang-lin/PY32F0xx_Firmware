@@ -53,7 +53,7 @@ int main(void)
   APP_SystemClockConfig();
   
   /* Initialize LED */
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   
   /* Configure and enable TIM1 counter mode */
   APP_ConfigTIM1Count();
@@ -82,7 +82,7 @@ static void APP_ConfigTIM1Count(void)
   /* Initialize TIM1 */
   LL_TIM_Init(TIM1,&TIM1CountInit);
   
-  /* Enable UPDATA interrupt */
+  /* Enable UPDATE interrupt */
   LL_TIM_EnableIT_UPDATE(TIM1);
   
   /* Enable TIM1 counter */
@@ -101,7 +101,7 @@ static void APP_ConfigTIM1Count(void)
 void APP_UpdateCallback(void)
 {
   /* Toggle LED */
-  BSP_LED_Toggle(LED3);
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 /**

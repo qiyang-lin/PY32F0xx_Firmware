@@ -99,7 +99,7 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc)
 
   /* Configure NVIC for RTC interrupts */
   HAL_NVIC_SetPriority(RTC_IRQn, 0, 0);
-  NVIC_EnableIRQ(RTC_IRQn);
+  HAL_NVIC_EnableIRQ(RTC_IRQn);
 
   __HAL_RTC_OVERFLOW_ENABLE_IT(hrtc, RTC_IT_OW);
   __HAL_RTC_SECOND_ENABLE_IT(hrtc, RTC_IT_SEC);

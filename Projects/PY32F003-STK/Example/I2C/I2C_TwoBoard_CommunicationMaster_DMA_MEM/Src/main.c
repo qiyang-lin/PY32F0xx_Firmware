@@ -32,10 +32,10 @@
 #include "main.h"
 
 /* Private define ------------------------------------------------------------*/
-#define DATA_LENGTH      15                 /* 数据长度 */
-#define I2C_ADDRESS      0xA0               /* 本机地址0xA0 */
-#define I2C_SPEEDCLOCK   100000             /* 通讯速度100K */
-#define I2C_DUTYCYCLE    I2C_DUTYCYCLE_16_9 /* 占空比 */
+#define DATA_LENGTH      15                 /* Length of data */
+#define I2C_ADDRESS      0xA0               /* Own address 0xA0 */
+#define I2C_SPEEDCLOCK   100000             /* Communication speed 100K */
+#define I2C_DUTYCYCLE    I2C_DUTYCYCLE_16_9 /* Duty cycle */
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef I2cHandle;
@@ -50,54 +50,54 @@ static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t Buff
 static void APP_LedBlinking(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 复位所有外设，初始化flash接口和systick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  /* 初始化按键BUTTON */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
   
-  /* I2C初始化 */
+  /* I2C initialization */
   I2cHandle.Instance             = I2C;                      /* I2C */
-  I2cHandle.Init.ClockSpeed      = I2C_SPEEDCLOCK;           /* I2C通讯速度 */
-  I2cHandle.Init.DutyCycle       = I2C_DUTYCYCLE;            /* I2C占空比 */
-  I2cHandle.Init.OwnAddress1     = I2C_ADDRESS;              /* I2C地址 */
-  I2cHandle.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;  /* 禁止广播呼叫 */
-  I2cHandle.Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;    /* 允许时钟延长 */
+  I2cHandle.Init.ClockSpeed      = I2C_SPEEDCLOCK;           /* I2C communication speed */
+  I2cHandle.Init.DutyCycle       = I2C_DUTYCYCLE;            /* I2C Duty cycle */
+  I2cHandle.Init.OwnAddress1     = I2C_ADDRESS;              /* I2C address */
+  I2cHandle.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;  /* Disable general call */
+  I2cHandle.Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;    /* Enable clock stretching */
   if (HAL_I2C_Init(&I2cHandle) != HAL_OK)
   {
     APP_ErrorHandler();
   }
   
-  /* 等待用户按键按下，主机程序开始运行 */
+  /* Wait for the user to press the button to start the main program */
   while (BSP_PB_GetState(BUTTON_KEY) == 1)
   {
   }
 
-  /*I2C主机DMA方式发送*/
+  /* I2C master DMA transmission*/
   while (HAL_I2C_Mem_Write_DMA(&I2cHandle, I2C_ADDRESS, 0x00, I2C_MEMADD_SIZE_16BIT, (uint8_t *)aTxBuffer, DATA_LENGTH) != HAL_OK)
   {
     APP_ErrorHandler();
   }
-  /*判断当前I2C状态*/
+  /*Check the current I2C state*/
   while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY);
-  HAL_Delay(100);/* 延时100ms */
-  /*I2C主机DMA方式接收*/
+  HAL_Delay(100);/* delay 100ms */
+  /*I2C master DMA reception*/
   while (HAL_I2C_Mem_Read_DMA(&I2cHandle, I2C_ADDRESS, 0x00, I2C_MEMADD_SIZE_16BIT, (uint8_t *)aRxBuffer, DATA_LENGTH) != HAL_OK)
   {
     APP_ErrorHandler();
   }
-  /*判断当前I2C状态*/
+  /*Check the current I2C state*/
   while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY);
   
-  /* 检查接收到的数据 */
+  /* Check the received data */
   APP_CheckEndOfTransfer();
   
   while (1)
@@ -106,31 +106,31 @@ int main(void)
 }
 
 /**
-  * @brief  校验数据函数
-  * @param  无
-  * @retval 无
+  * @brief  Data verification
+  * @param  None
+  * @retval None
   */
 static void APP_CheckEndOfTransfer(void)
 {
-  /* 比较发送数据和接收数据 */
+  /* Compare the transmitted data with the received data */
   if(APP_Buffercmp8((uint8_t*)aTxBuffer, (uint8_t*)aRxBuffer, DATA_LENGTH))
   {
-    /* 错误处理 */
+    /* Error handling */
     APP_LedBlinking();
   }
   else
   {
-    /* 如果数据接收到，则打开 LED */
+    /* If data received successfully, turn on the LED */
     BSP_LED_On(LED_GREEN);
   }
 }
 
 /**
-  * @brief  字符比较函数
-  * @param  pBuffer1：待比较缓冲区1
-  * @param  pBuffer2：待比较缓冲区2
-  * @param  BufferLength：待比较字符的个数
-  * @retval 0：比较值相同；1：比较值不同
+  * @brief  Character comparison function
+  * @param  pBuffer1：Pointer to the first buffer to be compared
+  * @param  pBuffer2：Pointer to the second buffer to be compared
+  * @param  BufferLength：Number of characters to compare
+  * @retval 0: buffers are the same; 1: buffers are different
   */
 static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t BufferLength)
 {
@@ -148,9 +148,9 @@ static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t Buff
 }
 
 /**
-  * @brief  LED灯闪烁
-  * @param  无
-  * @retval 无
+  * @brief  LED blinking function
+  * @param  None
+  * @retval None
   */
 static void APP_LedBlinking(void)
 {
@@ -162,13 +162,13 @@ static void APP_LedBlinking(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -176,16 +176,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

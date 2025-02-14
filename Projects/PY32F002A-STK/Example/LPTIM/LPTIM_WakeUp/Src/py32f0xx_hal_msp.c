@@ -33,15 +33,15 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
   BSP_LED_Init(LED_GREEN);
   BSP_PB_Init(BUTTON_USER,BUTTON_MODE_GPIO);
 
-  HAL_NVIC_SetPriority(LPTIM1_IRQn, 0x01,  0);                     /* 设置LPTIM中断优先级 */
-  HAL_NVIC_EnableIRQ(LPTIM1_IRQn);                                 /* 使能LPTIM全局中断 */
+  HAL_NVIC_SetPriority(LPTIM1_IRQn, 0x01,  0);                     /* Set LPTIM interrupt priority */
+  HAL_NVIC_EnableIRQ(LPTIM1_IRQn);                                 /* Enable LPTIM global interrupt */
 
 }
 

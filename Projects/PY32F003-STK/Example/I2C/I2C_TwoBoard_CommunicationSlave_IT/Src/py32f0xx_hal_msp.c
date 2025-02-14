@@ -40,7 +40,7 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -49,32 +49,32 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始化I2C的MSP
+  * @brief Initialize I2C MSP
   */
 void HAL_I2C_MspInit(I2C_HandleTypeDef *hi2c)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   
-  __HAL_RCC_I2C_CLK_ENABLE();                                 /* I2C时钟使能 */
-  __HAL_RCC_GPIOA_CLK_ENABLE();                               /* GPIOA时钟使能 */
+  __HAL_RCC_I2C_CLK_ENABLE();                                 /* Enable I2C clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                               /* Enable GPIOA clock */
 
-  /**I2C引脚配置
+  /**I2C pin Configuration
   PA3     ------> I2C1_SCL
   PA2     ------> I2C1_SDA
   */
   GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_2;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;                     /* 推挽 */
-  GPIO_InitStruct.Pull = GPIO_PULLUP;                         /* 上拉 */
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;                     /* Open-drain mode */
+  GPIO_InitStruct.Pull = GPIO_PULLUP;                         /* Pull-up */
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF12_I2C;                   /* 复用为I2C */
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);                     /* GPIO初始化 */
-  /*复位I2C*/
+  GPIO_InitStruct.Alternate = GPIO_AF12_I2C;                   /* Alternate as I2C */
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);                     /* Initialize GPIO */
+  /*Reset I2C*/
   __HAL_RCC_I2C_FORCE_RESET();
   __HAL_RCC_I2C_RELEASE_RESET();
 
   /* I2C1 interrupt Init */
-  HAL_NVIC_SetPriority(I2C1_IRQn, 0, 0);                     /* 中断优先级设置 */
-  HAL_NVIC_EnableIRQ(I2C1_IRQn);                              /* 使能I2C中断 */
+  HAL_NVIC_SetPriority(I2C1_IRQn, 0, 0);                     /* Set interrupt priority */
+  HAL_NVIC_EnableIRQ(I2C1_IRQn);                              /* Enable I2C interrupt */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

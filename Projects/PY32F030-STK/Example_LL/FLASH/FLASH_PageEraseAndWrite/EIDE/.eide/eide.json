@@ -2,9 +2,7 @@
   "name": "Project",
   "type": "ARM",
   "dependenceList": [],
-  "srcDirs": [
-    ".eide/deps"
-  ],
+  "srcDirs": [],
   "virtualFolder": {
     "name": "<virtual_root>",
     "files": [],
@@ -41,30 +39,21 @@
       },
       {
         "name": "PY32F0xx_HAL_Driver",
-        "files":[
+        "files": [
           {
-            "path":"../../../../../../Drivers/PY32F0xx_HAL_Driver/Src/py32f0xx_ll_utils.c"
-          },
-          {                
-            "path":"../../../../../../Drivers/PY32F0xx_HAL_Driver/Src/py32f0xx_hal.c"
-          },
-          {                
-            "path":"../../../../../../Drivers/PY32F0xx_HAL_Driver/Src/py32f0xx_hal_cortex.c"
-          },
-          {                
-            "path":"../../../../../../Drivers/PY32F0xx_HAL_Driver/Src/py32f0xx_hal_flash.c"
+            "path": "../../../../../../Drivers/PY32F0xx_HAL_Driver/Src/py32f0xx_ll_utils.c"
           }
         ],
         "folders": []
       },
       {
         "name": "User",
-        "files":[
+        "files": [
           {
-            "path":"../Src/main.c"
+            "path": "../Src/main.c"
           },
           {
-            "path":"../Src/py32f0xx_it.c"
+            "path": "../Src/py32f0xx_it.c"
           }
         ],
         "folders": []
@@ -121,6 +110,7 @@
       "custom_dep": {
         "name": "default",
         "incList": [
+          ".",
           "../Inc",
           "../../../../../../Drivers/BSP/PY32F030xx_Start_Kit",
           "../../../../../../Drivers/CMSIS/Include",
@@ -128,10 +118,11 @@
           "../../../../../../Drivers/PY32F0xx_HAL_Driver/Inc"
         ],
         "libList": [],
-        "sourceDirList": [],
-        "defineList": ["PY32F030x8"]
+        "defineList": [
+          "PY32F030x8"
+        ]
       }
     }
   },
-  "version": "3.3"
+  "version": "3.4"
 }

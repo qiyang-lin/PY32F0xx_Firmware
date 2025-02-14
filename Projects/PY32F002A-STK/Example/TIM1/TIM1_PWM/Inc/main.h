@@ -43,7 +43,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void APP_ErrorHandler(void);
 
 #define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
 #define TIMx_CHANNEL_GPIO_PORT()       __HAL_RCC_GPIOA_CLK_ENABLE()

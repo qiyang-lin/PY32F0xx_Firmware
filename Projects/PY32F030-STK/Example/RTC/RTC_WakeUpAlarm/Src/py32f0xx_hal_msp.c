@@ -44,8 +44,8 @@
   */
 void HAL_MspInit(void)
 {
-  BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
-  BSP_LED_Init(LED_GREEN);
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+  __HAL_RCC_PWR_CLK_ENABLE();
 }
 
 /**
@@ -99,7 +99,7 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc)
 
   /* Enable RTC interrupt */
   HAL_NVIC_SetPriority(RTC_IRQn, 0, 0);
-  NVIC_EnableIRQ(RTC_IRQn);
+  HAL_NVIC_EnableIRQ(RTC_IRQn);
 }
 
 /**

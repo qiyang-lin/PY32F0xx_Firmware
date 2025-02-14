@@ -46,8 +46,8 @@ extern "C" {
 #include "py32f0xx_ll_utils.h"
 #include "py32f0xx_ll_pwr.h"
 #include "py32f0xx_ll_gpio.h"
-
-#include "py32f0xx_hal.h"
+#include "py32f0xx_ll_flash.h"
+#include "py32f002xx_ll_Start_Kit.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "py32_assert.h"
@@ -58,7 +58,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void APP_ErrorHandler(void);
 
 /* Private defines -----------------------------------------------------------*/
 

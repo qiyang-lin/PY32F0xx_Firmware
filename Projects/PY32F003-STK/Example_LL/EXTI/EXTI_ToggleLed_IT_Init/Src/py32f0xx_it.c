@@ -94,7 +94,7 @@ void SysTick_Handler(void)
   */
 void EXTI4_15_IRQHandler(void)
 {
-  /* 处理EXTI中断请求 */
+  /* Handling EXTI interrupt requests */
   if(LL_EXTI_IsActiveFlag(LL_EXTI_LINE_12))
   {
     BSP_LED_Toggle(LED_GREEN);

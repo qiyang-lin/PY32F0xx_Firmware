@@ -94,7 +94,7 @@ void SysTick_Handler(void)
   */
 void EXTI4_15_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6); /*处理EXTI中断请求 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6); /* Handling EXTI interrupt requests */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

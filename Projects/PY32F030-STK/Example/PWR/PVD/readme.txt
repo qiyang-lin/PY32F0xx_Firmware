@@ -38,8 +38,12 @@ to 3.3V), the LED will be turned off.
 3.Input 0V again, and the LED will be turned on.
 ================================================================================
 注意事项：
-本例程中PA11引脚默认Pull-up，因此默认PVDO状态为0
+1. 本样例中PB07引脚被配置为上拉，因此PB07悬空时PVDO的状态为0。
+2. 低功耗应用中，PVD时钟源应该选择LSC，否则无法正常工作。
 
 Notes:
-In this example, pin PA11 is pulled up by default, so the default PVDO state is 0.
+1. The PB07 pin is configured as pull-up in this sample, so the state of PVDO 
+is 0 when PB07 is suspended.
+2. In low-power applications, the PVD clock source should be selected as LSC, 
+otherwise it will not work properly.
 ================================================================================

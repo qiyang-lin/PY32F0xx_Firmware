@@ -33,9 +33,14 @@
 #include "py32f003xx_ll_Start_Kit.h"
 
 /* Private define ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+#define TXSTARTMESSAGESIZE    (COUNTOF(aTxStartMessage) - 1)
+#define TXENDMESSAGESIZE      (COUNTOF(aTxEndMessage) - 1)
+
 /* Private variables ---------------------------------------------------------*/
-uint8_t aTxBuffer[] = "UART Test";
-uint8_t aRxBuffer[30];
+uint8_t aRxBuffer[12] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+uint8_t aTxStartMessage[] = "\n\r USART Hyperterminal communication based on IT \n\r Enter 12 characters using keyboard :\n\r";
+uint8_t aTxEndMessage[] = "\n\r Example Finished\n\r";
 
 uint8_t *TxBuff = NULL;
 __IO uint16_t TxSize = 0;
@@ -46,6 +51,7 @@ __IO uint16_t RxSize = 0;
 __IO uint16_t RxCount = 0;
 
 __IO ITStatus UartReady = RESET;
+__IO ITStatus UartError = RESET;
 
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -54,22 +60,43 @@ static void APP_SystemClockConfig(void);
 static void APP_ConfigUsart(USART_TypeDef *USARTx);
 static void APP_UsartTransmit_IT(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size);
 static void APP_UsartReceive_IT(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size);
+static void APP_WaitToReady(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure system clock */
   APP_SystemClockConfig();
+  
+  /* Initialize LED */
+  BSP_LED_Init(LED_GREEN);
 
-  /* USART配置 */
+  /* Initialize USART */
   APP_ConfigUsart(USART1);
   
-  /* 发送"UART Test"，并等待发送完成 */
-  APP_UsartTransmit_IT(USART1, (uint8_t*)aTxBuffer, sizeof(aTxBuffer)-1);
+  /* Send a notification message indicating the start of communication through interruption */
+  APP_UsartTransmit_IT(USART1, (uint8_t*)aTxStartMessage, TXSTARTMESSAGESIZE);
+  APP_WaitToReady();
+
+  /* Receive data using interrupt */
+  APP_UsartReceive_IT(USART1, (uint8_t *)aRxBuffer, 12);
+  APP_WaitToReady();
+
+  /* Sending data through interrupt mode */
+  APP_UsartTransmit_IT(USART1, (uint8_t*)aRxBuffer, 12);
+  APP_WaitToReady();
+    
+  /* Send a notification message indicating the end of communication through interruption */
+  APP_UsartTransmit_IT(USART1, (uint8_t*)aTxEndMessage, TXENDMESSAGESIZE);
+  APP_WaitToReady();
+
+  /* Turn on LED */
+  BSP_LED_On(LED_GREEN);
+  
   while (UartReady != SET)
   {
   }
@@ -77,162 +104,166 @@ int main(void)
 
   while (1)
   {
-    /* 接收数据 */
-    APP_UsartReceive_IT(USART1, (uint8_t *)aRxBuffer, 12);
-    while (UartReady != SET)
-    {
-    }
-    UartReady = RESET;
-    
-    /* 发送数据 */
-    APP_UsartTransmit_IT(USART1, (uint8_t*)aRxBuffer, 12);
-    while (UartReady != SET)
-    {
-    }
-    UartReady = RESET;
   }
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB prescaler*/
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* Configure HSISYS as system clock source */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 prescaler*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(8000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(8000000);
 }
 
 /**
-  * @brief  USART配置函数
-  * @param  USARTx：USART模块，可以是USART1、USART2
-  * @retval 无
+  * @brief  Wait for transfer to complete
+  * @param  None
+  * @retval None
+  */
+static void APP_WaitToReady(void)
+{
+  while (UartReady != SET);
+  
+  UartReady = RESET;
+
+  if(UartError == SET)
+  {
+    APP_ErrorHandler();
+  }
+}
+
+/**
+  * @brief  USART configuration
+  * @param  USARTx：USART module, can be USART1 or USART2
+  * @retval None
   */
 static void APP_ConfigUsart(USART_TypeDef *USARTx)
 {
-  /*使能时钟、初始化引脚、使能NVIC中断*/
+  /*Enable clock, initialize pins, enable NVIC interrupt*/
   if (USARTx == USART1) 
   {
-    /*使能GPIOA时钟*/
+    /*Enable GPIOA clock*/
     LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
-    /*使能USART1时钟*/
+    /*Enable USART1 clock*/
     LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_USART1);
     
-    /*GPIOA配置*/
+    /*GPIOA configuration*/
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-    /*选择2号引脚*/
+    /*Select pin 2*/
     GPIO_InitStruct.Pin = LL_GPIO_PIN_2;
-    /*选择复用模式*/
+    /*Select alternate function mode*/
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    /*选择输出速度*/
+    /*Select output speed*/
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    /*选择输出模式*/
+    /*Select push-pull output mode*/
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    /*选择上拉*/
+    /*Select pull-up*/
     GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-    /*复用为USART1功能*/
+    /*Select USART1 function*/
     GPIO_InitStruct.Alternate = LL_GPIO_AF1_USART1;
-    /*GPIOA初始化*/
+    /*Initialize GPIOA*/
     LL_GPIO_Init(GPIOA,&GPIO_InitStruct);
     
-    /*选择3号引脚*/
+    /*Select pin 3*/
     GPIO_InitStruct.Pin = LL_GPIO_PIN_3;
-    /*复用为USART1功能*/
+    /*Select USART1 function*/
     GPIO_InitStruct.Alternate = LL_GPIO_AF1_USART1;
-    /*GPIOA初始化*/
+    /*Initialize GPIOA*/
     LL_GPIO_Init(GPIOA,&GPIO_InitStruct);
     
-    /*设置USART1中断优先级*/
+    /*Set USART1 interrupt priority*/
     NVIC_SetPriority(USART1_IRQn,0);
-    /*使能USART1中断*/
+    /*Enable USART1 interrupt*/
     NVIC_EnableIRQ(USART1_IRQn);
   }
   else if (USARTx == USART2)
   {
-    /*使能GPIOA时钟*/
+    /*Enable GPIOA clock*/
     LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
-    /*使能USART1时钟*/
+    /*Enable USART1 clock*/
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USART2);
     
-    /*GPIOA配置*/
+    /*GPIOA configuration*/
     LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-    /*选择2号引脚*/
+    /*Select pin 2*/
     GPIO_InitStruct.Pin = LL_GPIO_PIN_2;
-    /*选择复用模式*/
+    /*Select alternate function mode*/
     GPIO_InitStruct.Mode = LL_GPIO_MODE_ALTERNATE;
-    /*选择输出速度*/
+    /*Select output speed*/
     GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_VERY_HIGH;
-    /*选择输出模式*/
+    /*Select push-pull output mode*/
     GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
-    /*选择上拉*/
+    /*Select pull-up*/
     GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
-    /*复用为USART2功能*/
+    /*Select USART2 function*/
     GPIO_InitStruct.Alternate = LL_GPIO_AF4_USART2;
-    /*GPIOA初始化*/
+    /*Initialize GPIOA*/
     LL_GPIO_Init(GPIOA,&GPIO_InitStruct);
     
-    /*选择3号引脚*/
+    /*Select pin 3*/
     GPIO_InitStruct.Pin = LL_GPIO_PIN_3;
-    /*复用为USART2功能*/
+    /*Select USART2 function*/
     GPIO_InitStruct.Alternate = LL_GPIO_AF4_USART2;
-    /*GPIOA初始化*/
+    /*Initialize GPIOA*/
     LL_GPIO_Init(GPIOA,&GPIO_InitStruct);
     
-    /*设置USART1中断优先级*/
+    /*Set USART1 interrupt priority*/
     NVIC_SetPriority(USART2_IRQn,0);
-    /*使能USART1中断*/
+    /*Enable USART1 interrupt*/
     NVIC_EnableIRQ(USART2_IRQn);
   }
   
-  /*配置USART功能*/
+  /*USART configuration*/
   LL_USART_InitTypeDef USART_InitStruct = {0};
-  /*设置波特率*/
+  /*Set baud rate*/
   USART_InitStruct.BaudRate = 9600;
-  /*设置数据长度*/
+  /*Set data width*/
   USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
-  /*停止位*/
+  /* Set stop bits */
   USART_InitStruct.StopBits = LL_USART_STOPBITS_1;
-  /*设置校验位*/
+  /* Set parity */
   USART_InitStruct.Parity = LL_USART_PARITY_NONE;
   USART_InitStruct.TransferDirection = LL_USART_DIRECTION_TX_RX;
   USART_InitStruct.HardwareFlowControl = LL_USART_HWCONTROL_NONE;
   USART_InitStruct.OverSampling = LL_USART_OVERSAMPLING_16;
-  /*USART初始化*/
+  /*Initialize USART*/
   LL_USART_Init(USARTx, &USART_InitStruct);
   
-  /*配置为全双工异步模式*/
+  /*Configure as full duplex asynchronous mode*/
   LL_USART_ConfigAsyncMode(USARTx);
   
-  /*使能UART模块*/
+  /*Enable UART module*/
   LL_USART_Enable(USARTx);
 }
 
 /**
-  * @brief  USART发送函数
-  * @param  USARTx：USART模块，可以是USART1、USART2
-  * @param  pData：发送缓冲区
-  * @param  Size：发送缓冲区大小
-  * @retval 无
+  * @brief  USART transmit function
+  * @param  USARTx：USART module, can be USART1 or USART2
+  * @param  pData：transmit buffer
+  * @param  Size：Size of the transmit buffer
+  * @retval None
   */
 static void APP_UsartTransmit_IT(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size)
 {
@@ -240,16 +271,16 @@ static void APP_UsartTransmit_IT(USART_TypeDef *USARTx, uint8_t *pData, uint16_t
   TxSize = Size;
   TxCount = Size;
   
-  /*使能发送数据寄存器空中断*/
+  /*Enable transmit data register empty interrupt*/
   LL_USART_EnableIT_TXE(USARTx); 
 }
 
 /**
-  * @brief  USART接收函数
-  * @param  USARTx：USART模块，可以是USART1、USART2
-  * @param  pData：接收缓冲区
-  * @param  Size：接收缓冲区大小
-  * @retval 无
+  * @brief  USART receive function
+  * @param  USARTx：USART module, can be USART1 or USART2
+  * @param  pData：receive buffer
+  * @param  Size：Size of the receive buffer
+  * @retval None
   */
 static void APP_UsartReceive_IT(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size)
 {
@@ -257,24 +288,24 @@ static void APP_UsartReceive_IT(USART_TypeDef *USARTx, uint8_t *pData, uint16_t 
   RxSize = Size;
   RxCount = Size;
   
-  /*使能接收奇偶校验错误中断*/
+  /* Enable parity error interrupt */
   LL_USART_EnableIT_PE(USARTx);
 
-  /*使能接收错误中断*/
+  /* Enable error interrupt */
   LL_USART_EnableIT_ERROR(USARTx);
 
-  /*使能接收数据寄存器非空中断*/
+  /* Enable receive data register not empty interrupt */
   LL_USART_EnableIT_RXNE(USARTx);
 }
 
 /**
-  * @brief  USART中断处理函数
-  * @param  USARTx：USART模块，可以是USART1、USART2
-  * @retval 无
+  * @brief  USART interrupt callback function
+  * @param  USARTx：USART module, can be USART1 or USART2
+  * @retval None
   */
 void APP_UsartIRQCallback(USART_TypeDef *USARTx)
 {
-  /* 接收数据寄存器不为空 */
+  /* Check if the receive data register is not empty */
   uint32_t errorflags = (LL_USART_IsActiveFlag_PE(USARTx) | LL_USART_IsActiveFlag_FE(USARTx) |\
                          LL_USART_IsActiveFlag_ORE(USARTx) | LL_USART_IsActiveFlag_NE(USARTx));
   if (errorflags == RESET)
@@ -285,23 +316,25 @@ void APP_UsartIRQCallback(USART_TypeDef *USARTx)
        RxBuff++;
       if (--RxCount == 0U)
       {
-          LL_USART_DisableIT_RXNE(USARTx);
-          LL_USART_DisableIT_PE(USARTx);
-          LL_USART_DisableIT_ERROR(USARTx);
-          
-          UartReady = SET;
+        LL_USART_DisableIT_RXNE(USARTx);
+        LL_USART_DisableIT_PE(USARTx);
+        LL_USART_DisableIT_ERROR(USARTx);
+        LL_USART_DisableDirectionRx(USARTx);
+        
+        UartReady = SET;
       }
       return;
     }
   }
   
-  /* 接收错误 */ 
+  /* Receive error */ 
   if (errorflags != RESET)
   {
-    APP_ErrorHandler();
+    UartError = SET;
+    return;
   }
   
-  /* 发送数据寄存器空 */ 
+  /* Transmit data register empty  */ 
   if ((LL_USART_IsActiveFlag_TXE(USARTx) != RESET) && (LL_USART_IsEnabledIT_TXE(USARTx) != RESET))
     {
       LL_USART_TransmitData8(USARTx, *TxBuff);
@@ -314,7 +347,7 @@ void APP_UsartIRQCallback(USART_TypeDef *USARTx)
       return;
   }
   
-  /* 发送完成 */
+  /* Transmission complete  */
   if ((LL_USART_IsActiveFlag_TC(USARTx) != RESET) && (LL_USART_IsEnabledIT_TC(USARTx) != RESET))
   {
     LL_USART_DisableIT_TC(USARTx);
@@ -324,13 +357,13 @@ void APP_UsartIRQCallback(USART_TypeDef *USARTx)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -338,16 +371,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

@@ -215,10 +215,6 @@ in voltage and temperature. */
 #include "py32f0xx_hal_wwdg.h"
 #endif /* HAL_WWDG_MODULE_ENABLED */
 
-#ifdef HAL_LED_MODULE_ENABLED
-#include "py32f0xx_hal_led.h"
-#endif /* HAL_LED_MODULE_ENABLED */
-
 #ifdef HAL_USART_MODULE_ENABLED
 #include "py32f0xx_hal_usart.h"
 #endif /* HAL_USART_MODULE_ENABLED */

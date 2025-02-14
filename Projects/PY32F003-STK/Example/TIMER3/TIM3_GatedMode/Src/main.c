@@ -43,51 +43,51 @@ TIM_IC_InitTypeDef sConfig;
 /* Private function prototypes -----------------------------------------------*/
 
 /**
-  * @brief   应用程序入口函数
+  * @brief   Main program.
   * @retval  int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
 
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  TimHandle.Instance = TIM3;                                           /* 选择TIM3 */
-  TimHandle.Init.Period            = 8000 - 1;                         /* 自动重装载值 */
-  TimHandle.Init.Prescaler         = 1 - 1;                            /* 不预分频 */
-  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* 时钟不分频 */
-  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* 向上计数 */
-  TimHandle.Init.RepetitionCounter = 1 - 1;                            /* 不重复计数 */
-  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;   /* 自动重装载寄存器没有缓冲 */
-  if (HAL_TIM_IC_Init(&TimHandle) != HAL_OK)                           /* TIM3输入捕获初始化 */
+  TimHandle.Instance = TIM3;                                           /* Select TIM3 */
+  TimHandle.Init.Period            = 8000 - 1;                         /* Auto-reload value */
+  TimHandle.Init.Prescaler         = 1 - 1;                            /* No prescaler */
+  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* No clock division */
+  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* Up counting */
+  TimHandle.Init.RepetitionCounter = 1 - 1;                            /* No repetition counting */
+  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;   /* Auto-reload register not buffered */
+  if (HAL_TIM_IC_Init(&TimHandle) != HAL_OK)                           /* TIM3 input capture initialization */
   {
     APP_ErrorHandler();
   }
   
-  /* TIM3_CH1输入配置 */
-  sConfig.ICPrescaler = TIM_ICPSC_DIV1;                                /* 不分配 */
-  sConfig.ICFilter = 0;                                                /* 不滤波 */
-  sConfig.ICPolarity = TIM_ICPOLARITY_FALLING;                         /* 下降沿捕获 */
-  sConfig.ICSelection = TIM_ICSELECTION_DIRECTTI;                      /* CC1通道配置为输入,IC1映射在TI1上 */
-  /* TIM3_CH1捕获配置 */
+  /* TIM3_CH1 input configuration */
+  sConfig.ICPrescaler = TIM_ICPSC_DIV1;                                /* No prescaler */
+  sConfig.ICFilter = 0;                                                /* No filter */
+  sConfig.ICPolarity = TIM_ICPOLARITY_FALLING;                         /* Capture on falling edge */
+  sConfig.ICSelection = TIM_ICSELECTION_DIRECTTI;                      /* Configure CC1 channel as input*/
+  /* TIM3_CH1 capture configuration */
   if (HAL_TIM_IC_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1) != HAL_OK)
   {
     APP_ErrorHandler();
   }
 
-  sSlaveConfig.SlaveMode        = TIM_SLAVEMODE_GATED;                 /* 从模式选择为复位模式 */
-  sSlaveConfig.InputTrigger     = TIM_TS_TI1FP1;                       /* TIM3的触发选择为TIM1 */
-  sSlaveConfig.TriggerPolarity  = TIM_TRIGGERPOLARITY_NONINVERTED;     /* 外部触发极性不反向 */
-  sSlaveConfig.TriggerPrescaler = TIM_TRIGGERPRESCALER_DIV1;           /* 外部触发不分频 */
-  sSlaveConfig.TriggerFilter    = 0;                                   /* 不滤波 */
-  /* 配置TIM3为从模式，中断方式 */
+  sSlaveConfig.SlaveMode        = TIM_SLAVEMODE_GATED;                 /* Slave mode selected as gated mode */
+  sSlaveConfig.InputTrigger     = TIM_TS_TI1FP1;                       /* Trigger selection for TIM3 is TIM1 */
+  sSlaveConfig.TriggerPolarity  = TIM_TRIGGERPOLARITY_NONINVERTED;     /* External trigger polarity is non-inverted */
+  sSlaveConfig.TriggerPrescaler = TIM_TRIGGERPRESCALER_DIV1;           /* External trigger is not prescaled */
+  sSlaveConfig.TriggerFilter    = 0;                                   /* No filter */
+  /* Configure TIM3 as slave mode, enable interrupts */
   if (HAL_TIM_SlaveConfigSynchro_IT(&TimHandle, &sSlaveConfig) != HAL_OK)
   {
     APP_ErrorHandler();
   }
-  if (HAL_TIM_IC_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)          /* TIM3启动计数并使能产生中断 */
+  if (HAL_TIM_IC_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)          /* Start counting and enable interrupt generation for TIM3 */
   {
     APP_ErrorHandler();
   }
@@ -99,9 +99,9 @@ int main(void)
 }
 
 /**
-  * @brief   触发中断回调函数
-  * @param   htim：TIM句柄
-  * @retval  无
+  * @brief   Trigger interrupt callback function
+  * @param   htim：TIM handle
+  * @retval  None
   */
 void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim)
 {
@@ -110,29 +110,29 @@ void HAL_TIM_TriggerCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
-  * @brief   错误执行函数
-  * @param   无
-  * @retval  无
+  * @brief   This function is executed in case of error occurrence.
+  * @param   None
+  * @retval  None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

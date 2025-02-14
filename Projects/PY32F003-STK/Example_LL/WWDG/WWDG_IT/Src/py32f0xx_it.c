@@ -93,14 +93,14 @@ void SysTick_Handler(void)
   */
 void WWDG_IRQHandler(void)
 {
-  /* 查看提前中断是否使能*/
+  /* Check if early interrupt is enabled*/
   if (LL_WWDG_IsEnabledIT_EWKUP(WWDG) != RESET)
   {
-    /* 查看提前中断是否出现 */
+    /* See if early interruption occurs */
     if(LL_WWDG_IsActiveFlag_EWKUP(WWDG) != RESET)
     {
       LL_WWDG_ClearFlag_EWKUP(WWDG);
-      /* 喂狗*/
+      /* feed dog*/
       LL_WWDG_SetCounter(WWDG, 0x7F); 
      }
   }

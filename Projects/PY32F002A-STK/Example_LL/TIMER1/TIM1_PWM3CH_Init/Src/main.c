@@ -34,50 +34,50 @@
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void APP_SystemClockConfig(void);
+static void APP_SystemClockConfig(void);
 static void APP_ConfigPWMChannel(void);
 static void APP_ConfigTIM1(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 配置系统时钟 */
+  /* Configure system clock */
   APP_SystemClockConfig();
- /*使能TIM1、GPIO时钟*/
+ /*Enable TIM1 and GPIO clock*/
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM1);
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
   
-  /*初始化按键*/
+  /*Initialize button*/
   BSP_PB_Init(BUTTON_USER,BUTTON_MODE_GPIO);
   
-  /*等待按键按下*/
+  /*Wait for button press*/
   while(BSP_PB_GetState(BUTTON_USER) != 0)
   {}
   
-  /*配置TIM1 PWM通道*/
+  /*Configure TIM1 PWM channels and PWM mode*/
   APP_ConfigPWMChannel();
   
-  /*配置并开启TIM1 PWM模式*/
+  /*Configure and enable TIM1 PWM mode*/
   APP_ConfigTIM1();
   while (1)
   {
   }
 }
 /**
-  * @brief  配置TIM1 PWM相关GPIO.
-  * @param  无
-  * @retval 无
+  * @brief  Configure TIM1 PWM related GPIO
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigPWMChannel(void)
 {
   LL_GPIO_InitTypeDef TIM1CH1MapInit= {0};
   LL_TIM_OC_InitTypeDef TIM_OC_Initstruct ={0};
 
-  /*配置PA3/PA13/PA0为TIM1_CH1/TIM1_CH2/TIM1_CH3*/
+  /* Configure PA3/PA13/PA0 as TIM1_CH1/TIM1_CH2/TIM1_CH3 */
   TIM1CH1MapInit.Pin        = LL_GPIO_PIN_3|LL_GPIO_PIN_13|LL_GPIO_PIN_0;
   TIM1CH1MapInit.Mode       = LL_GPIO_MODE_ALTERNATE;
   TIM1CH1MapInit.Alternate  = LL_GPIO_AF_13; 
@@ -86,91 +86,89 @@ static void APP_ConfigPWMChannel(void)
   TIM1CH1MapInit.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOA,&TIM1CH1MapInit);
   
-  
-  /*配置PWM通道*/
-  TIM_OC_Initstruct.OCMode        = LL_TIM_OCMODE_PWM2;       /* 通道模式：PWM2       */
-  TIM_OC_Initstruct.OCState       = LL_TIM_OCSTATE_ENABLE;    /* 通道状态：开启       */
-  TIM_OC_Initstruct.OCPolarity    = LL_TIM_OCPOLARITY_HIGH;   /* 通道有效极性：高电平 */
-  TIM_OC_Initstruct.OCIdleState   = LL_TIM_OCIDLESTATE_LOW;   /* 通道空闲极性：低电平 */
-  /*通道1比较值:250*/
+  TIM_OC_Initstruct.OCMode        = LL_TIM_OCMODE_PWM2;       /* Mode: PWM2       */
+  TIM_OC_Initstruct.OCState       = LL_TIM_OCSTATE_ENABLE;    /* Channel enable       */
+  TIM_OC_Initstruct.OCPolarity    = LL_TIM_OCPOLARITY_HIGH;   /* Active polarity: high level */
+  TIM_OC_Initstruct.OCIdleState   = LL_TIM_OCIDLESTATE_LOW;   /* Complementary channel active polarity: low level */
+  /*Channel 1 compare value: 250*/
   TIM_OC_Initstruct.CompareValue  = 250;
-  /*配置通道1*/
+  /* Configure channel 1 */
   LL_TIM_OC_Init(TIM1,LL_TIM_CHANNEL_CH1,&TIM_OC_Initstruct);
-  /*通道2比较值:500*/
+  /* Channel 2 compare value: 500 */
   TIM_OC_Initstruct.CompareValue  = 500;
-  /*配置通道2*/
+  /* Configure channel 2 */
   LL_TIM_OC_Init(TIM1,LL_TIM_CHANNEL_CH2,&TIM_OC_Initstruct);
-  /*通道3比较值:750*/
+  /* Channel 3 compare value: 750 */
   TIM_OC_Initstruct.CompareValue  = 750;
-  /*配置通道3*/
+  /* Configure channel 3 */
   LL_TIM_OC_Init(TIM1,LL_TIM_CHANNEL_CH3,&TIM_OC_Initstruct);
 }
 
 /**
-  * @brief  配置TIM1.
-  * @param  无
+  * @brief  Configure TIM1.
+  * @param  None
   * @retval int
   */
 static void APP_ConfigTIM1(void)
 {
-  /*配置TIM1*/
+  /*Configure TIM1*/
   LL_TIM_InitTypeDef TIM1CountInit = {0};
   
-  TIM1CountInit.ClockDivision       = LL_TIM_CLOCKDIVISION_DIV1;/* 不分频             */
-  TIM1CountInit.CounterMode         = LL_TIM_COUNTERMODE_UP;    /* 计数模式：向上计数 */
-  TIM1CountInit.Prescaler           = 2400-1;                   /* 时钟预分频：2400   */
-  TIM1CountInit.Autoreload          = 1000-1;                   /* 自动重装载值：1000 */
-  TIM1CountInit.RepetitionCounter   = 0;                        /* 重复计数值：0      */
+  TIM1CountInit.ClockDivision       = LL_TIM_CLOCKDIVISION_DIV1;/* No clock division             */
+  TIM1CountInit.CounterMode         = LL_TIM_COUNTERMODE_UP;    /* Up-counting mode */
+  TIM1CountInit.Prescaler           = 2400-1;                   /* Prescaler value: 2400   */
+  TIM1CountInit.Autoreload          = 1000-1;                   /* Auto-reload value */
+  TIM1CountInit.RepetitionCounter   = 0;                        /* Repetition counter value: 0      */
   
-  /*初始化TIM1*/
+  /*Initialize TIM1*/
   LL_TIM_Init(TIM1,&TIM1CountInit);
   
-  /*主输出使能*/
+  /*Enable main output*/
   LL_TIM_EnableAllOutputs(TIM1);
 
-  /*使能TIM1计数器*/
+  /*Enable TIM1 counter*/
   LL_TIM_EnableCounter(TIM1);
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  System clock configuration
+  * @param  None
+  * @retval None
   */
-void APP_SystemClockConfig(void)
+static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   LL_RCC_HSI_SetCalibFreq(LL_RCC_HSICALIBRATION_24MHz);
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB prescaler*/
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /*Configure HSISYS as system clock source */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 prescaler*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(24000000);
   
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -178,16 +176,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

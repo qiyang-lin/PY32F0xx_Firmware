@@ -50,7 +50,7 @@ int main(void)
   APP_SystemClockConfig();
 
   /* LED initialization */
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
 
   /* IWDG configuration */
   APP_IwdgConfig();
@@ -63,7 +63,7 @@ int main(void)
     /* LL_mDelay(1100); */
 
     /* Toggle LED */
-    BSP_LED_Toggle(LED3);
+    BSP_LED_Toggle(LED_GREEN);
 
     /* Feed watchdog */
     LL_IWDG_ReloadCounter(IWDG);
@@ -75,7 +75,7 @@ int main(void)
   * @param  None
   * @retval None
   */
-void APP_SystemClockConfig(void)
+static void APP_SystemClockConfig(void)
 {
   /* Enable and initialize HSI */
   LL_RCC_HSI_Enable();

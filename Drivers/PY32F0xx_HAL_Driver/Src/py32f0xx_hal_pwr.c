@@ -330,8 +330,9 @@ HAL_StatusTypeDef HAL_PWR_ConfigStopMode(PWR_StopModeConfigTypeDef *sStopModeCon
   assert_param(IS_PWR_WAKEUP_FLASH_DELAY(sStopModeConfig->FlashDelay));
 
   /* Set the STOP mode and STOP wake-up timing related configurations */
-  MODIFY_REG(PWR->CR1, (PWR_CR1_VOS | PWR_CR1_MRRDY_TIME | PWR_CR1_HSION_CTRL | PWR_CR1_SRAM_RETV | PWR_CR1_SRAM_RETV), 
+  MODIFY_REG(PWR->CR1, (PWR_CR1_VOS | PWR_CR1_MRRDY_TIME | PWR_CR1_HSION_CTRL | PWR_CR1_SRAM_RETV | PWR_CR1_FLS_SLPTIME), 
                        (sStopModeConfig->LPVoltSelection) | \
+                       (sStopModeConfig->WakeUpHsiEnableTime) | \
                        (sStopModeConfig->RegulatorSwitchDelay) | \
                        (sStopModeConfig->SramRetentionVolt) | \
                        (sStopModeConfig->FlashDelay));

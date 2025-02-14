@@ -34,7 +34,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-EXTI_HandleTypeDef exti_handle;
+PWR_StopModeConfigTypeDef PwrStopModeConf = {0};
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -42,23 +43,23 @@ EXTI_HandleTypeDef exti_handle;
 void APP_EXTIConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  HAL_Init();                                   /*初始化systick*/
+  HAL_Init();                                   /*Reset of all peripherals, Initializes the Systick*/
     
-  /*配置外部中断*/
+  /*Configure external interrupt*/
   APP_EXTIConfig();    
 
-  /*UART配置*/  
+  /*USART configuration*/  
   BSP_USART_Config();                           
   
   /* LED ON */
   BSP_LED_On(LED_GREEN);
 
-  /* 等待按键*/
+  /* Wait for the button to be pressed*/
   while (BSP_PB_GetState(BUTTON_USER))
   {
   }
@@ -68,13 +69,21 @@ int main(void)
   
   printf("STOP MODE!\n\n");
   
-  /*systick中断关闭*/
-  HAL_SuspendTick();                            
+  /*Suspend Systick interrupt*/
+  HAL_SuspendTick();  
+ 
+  /* VCORE = 1.0V  when enter stop mode */
+  PwrStopModeConf.LPVoltSelection       =  PWR_STOPMOD_LPR_VOLT_SCALE2;
+  PwrStopModeConf.FlashDelay            =  PWR_WAKEUP_FLASH_DELAY_5US;
+  PwrStopModeConf.WakeUpHsiEnableTime   =  PWR_WAKEUP_HSIEN_AFTER_MR;
+  PwrStopModeConf.RegulatorSwitchDelay  =  PWR_WAKEUP_LPR_TO_MR_DELAY_2US;
+  PwrStopModeConf.SramRetentionVolt     =  PWR_SRAM_RETENTION_VOLT_VOS;
+  HAL_PWR_ConfigStopMode(&PwrStopModeConf);  
   
-  /*进入STOP模式*/
+  /* Enter STOP mode */
   HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
   
-  /*systick中断打开*/
+  /*Resume the SysTick interrupt*/
   HAL_ResumeTick();  
   
   printf("WAKEUP OK!\n\n");
@@ -87,19 +96,19 @@ int main(void)
 }
 
 /**
-  * @brief  配置外部中断
-  * @param  无
-  * @retval 无
+  * @brief  Configure external interrupt
+  * @param  None
+  * @retval None
   */
 void APP_EXTIConfig(void)
 {
   GPIO_InitTypeDef  GPIO_InitStruct = {0};
 
-  __HAL_RCC_GPIOA_CLK_ENABLE();                                        /* 使能GPIOA时钟 */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                                        /* Enable GPIOA clock */
 
-  GPIO_InitStruct.Mode  = GPIO_MODE_IT_FALLING;                        /* 下降沿触发 */
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;                                 /* 上拉 */
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;                        /* 高速 */
+  GPIO_InitStruct.Mode  = GPIO_MODE_IT_FALLING;                        /* GPIO mode set to falling edge interrupt */
+  GPIO_InitStruct.Pull  = GPIO_PULLUP;                                 /* Pull-up */
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;                        /* High-speed */
   GPIO_InitStruct.Pin = GPIO_PIN_6;
 
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -109,13 +118,13 @@ void APP_EXTIConfig(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -123,16 +132,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

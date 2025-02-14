@@ -55,7 +55,7 @@ int main(void)
   APP_SystemClockConfig();
   
   /* Initialize LED */
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   
   /* Configure capture channel TI1 */
   APP_ConfigInputCapture();
@@ -135,7 +135,7 @@ static void APP_ConfigTIM1Count(void)
 void APP_InputcaptureCallback(void)
 {
   /* Toggle LED */
-  BSP_LED_Toggle(LED3);
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 /**

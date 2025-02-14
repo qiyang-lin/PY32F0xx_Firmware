@@ -33,9 +33,14 @@
 #include "py32f030xx_ll_Start_Kit.h"
 
 /* Private define ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+#define TXSTARTMESSAGESIZE    (COUNTOF(aTxStartMessage) - 1)
+#define TXENDMESSAGESIZE      (COUNTOF(aTxEndMessage) - 1)
+
 /* Private variables ---------------------------------------------------------*/
-uint8_t aTxBuffer[] = "UART Test";
-uint8_t aRxBuffer[30];
+uint8_t aRxBuffer[12] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+uint8_t aTxStartMessage[] = "\n\r USART Hyperterminal communication based on DMA\n\r Enter 12 characters using keyboard :\n\r";
+uint8_t aTxEndMessage[] = "\n\r Example Finished\n\r";
 __IO ITStatus UartReady = RESET;
 
 /* Private user code ---------------------------------------------------------*/
@@ -46,6 +51,7 @@ static void APP_ConfigUsart(USART_TypeDef *USARTx);
 static void APP_ConfigDma(USART_TypeDef *USARTx);
 static void APP_UsartTransmit_DMA(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size);
 static void APP_UsartReceive_DMA(USART_TypeDef *USARTx, uint8_t *pData, uint16_t Size);
+static void APP_WaitToReady(void);
 
 /**
   * @brief  Main program.
@@ -57,31 +63,35 @@ int main(void)
   /* Configure system clock */
   APP_SystemClockConfig();
   
+  /* Configure LED */
+  BSP_LED_Init(LED_GREEN);
+  
   /* Configure USART */
   APP_ConfigUsart(USART1);
+    
+ /* Start the transmission process */
+  APP_UsartTransmit_DMA(USART1, (uint8_t*)aTxStartMessage, TXSTARTMESSAGESIZE);
+  APP_WaitToReady();
   
-  /* Send "UART Test" using DMA and wait for transmission to complete */
-  APP_UsartTransmit_DMA(USART1, (uint8_t*)aTxBuffer, sizeof(aTxBuffer)-1);
-  while (UartReady != SET)
-  {
-  }
-  UartReady = RESET;
+  /* Put UART peripheral in reception process */
+  APP_UsartReceive_DMA(USART1, (uint8_t *)aRxBuffer, 12);
+  APP_WaitToReady();
 
+  /* Send the received Buffer */
+  APP_UsartTransmit_DMA(USART1, (uint8_t*)aRxBuffer, 12);
+  APP_WaitToReady();
+  
+  /* Send the End Message */
+  APP_UsartTransmit_DMA(USART1, (uint8_t*)aTxEndMessage, TXENDMESSAGESIZE);
+  APP_WaitToReady();
+  
+  /* Turn on LED if test passes then enter infinite loop */
+  BSP_LED_On(LED_GREEN);
+  
+  /* Infinite loop */
   while (1)
   {
-    /* Receive data */
-    APP_UsartReceive_DMA(USART1, (uint8_t *)aRxBuffer, 12);
-    while (UartReady != SET)
-    {
-    }
-    UartReady = RESET;
-    
-    /* Send data */
-    APP_UsartTransmit_DMA(USART1, (uint8_t*)aRxBuffer, 12);
-    while (UartReady != SET)
-    {
-    }
-    UartReady = RESET;
+
   }
 }
 
@@ -113,6 +123,18 @@ static void APP_SystemClockConfig(void)
 
   /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(8000000);
+}
+
+/**
+  * @brief  Wait transfer complete
+  * @param  None
+  * @retval None
+  */
+static void APP_WaitToReady(void)
+{
+  while (UartReady != SET);
+  
+  UartReady = RESET;
 }
 
 /**

@@ -42,24 +42,24 @@ static void APP_ConfigTIM1Count(void);
 static void APP_ConfigTIM1ExternalClock(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 使能TIM1时钟 */
+  /* Enable TIM1 clock */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_TIM1);
 
-  /* 配置系统时钟 */
+  /* Configure system clock */
   APP_SystemClockConfig();
   
-  /* 初始化LED */
-  BSP_LED_Init(LED3);
+  /* Initialize LED */
+  BSP_LED_Init(LED_GREEN);
   
-  /* 配置外部时钟模式1 */
+  /* Configure external clock mode 1 */
   APP_ConfigTIM1ExternalClock();
   
-  /* 配置并开启TIM1计数模式 */
+  /* Configure and enable TIM1 counter mode */
   APP_ConfigTIM1Count();
   
   while (1)
@@ -68,13 +68,13 @@ int main(void)
 }
 
 /**
-  * @brief  配置外部时钟输入
-  * @param  无
-  * @retval 无
+  * @brief  Configure external clock input
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigTIM1ExternalClock(void)
 {
-  /* 配置PA12引脚为TIM1_ETR输入 */
+  /* Configure PA12 pin as TIM1_ETR input */
   LL_GPIO_InitTypeDef ETRGPIOinit={0};
   
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
@@ -87,13 +87,13 @@ static void APP_ConfigTIM1ExternalClock(void)
   ETRGPIOinit.Speed = LL_GPIO_SPEED_FREQ_HIGH; 
   LL_GPIO_Init(GPIOA,&ETRGPIOinit);
   
-  /* 配置TIM1外部时钟源模式1 */
+  /* Configure TIM1 external clock source mode 1 */
   LL_TIM_SetClockSource(TIM1,LL_TIM_CLOCKSOURCE_EXT_MODE1);
   
-  /* 配置触发选择为ETRF */
+  /* Configure trigger selection as ETRF */
   LL_TIM_SetTriggerInput(TIM1,LL_TIM_TS_ETRF);
   
-  /* 配置ETR */
+  /* Configure ETR */
   LL_TIM_ConfigETR(TIM1,LL_TIM_ETR_POLARITY_NONINVERTED,
                         LL_TIM_ETR_PRESCALER_DIV1,
                         LL_TIM_ETR_FILTER_FDIV1);
@@ -101,80 +101,80 @@ static void APP_ConfigTIM1ExternalClock(void)
 }
 
 /**
-  * @brief  配置TIM计数模式
-  * @param  无
-  * @retval 无
+  * @brief  Configure TIM count mode
+  * @param  None
+  * @retval None
   */
 static void APP_ConfigTIM1Count(void)
 {
-  /* 配置TIM1 */
+  /* Configure TIM1 */
   LL_TIM_InitTypeDef TIM1CountInit = {0};
   
-  TIM1CountInit.ClockDivision       = LL_TIM_CLOCKDIVISION_DIV1; /* 时钟不分频 */
-  TIM1CountInit.CounterMode         = LL_TIM_COUNTERMODE_UP;     /* 向上计数 */
-  TIM1CountInit.Prescaler           = 1000-1;                    /* 时钟预分频：1000 */
-  TIM1CountInit.Autoreload          = 500-1;                     /* 自动重装载值：500 */
-  TIM1CountInit.RepetitionCounter   = 0;                         /* 重复计数值：0 */
+  TIM1CountInit.ClockDivision       = LL_TIM_CLOCKDIVISION_DIV1; /* No clock division */
+  TIM1CountInit.CounterMode         = LL_TIM_COUNTERMODE_UP;     /* Up counting */
+  TIM1CountInit.Prescaler           = 1000-1;                    /* Clock prescaler: 1000 */
+  TIM1CountInit.Autoreload          = 500-1;                     /* Auto-reload value：500 */
+  TIM1CountInit.RepetitionCounter   = 0;                         /* Repetition counter value: 0 */
   
-  /* 初始化TIM1 */
+  /* Initialize TIM1 */
   LL_TIM_Init(TIM1,&TIM1CountInit);
   
-  /* 使能UPDATE中断 */
+  /* Enable UPDATE interrupt */
   LL_TIM_EnableIT_UPDATE(TIM1);
   
-  /* 使能TIM1计数器 */
+  /* Enable TIM1 counter */
   LL_TIM_EnableCounter(TIM1);
   
-  /* 开启UPDATE中断请求 */
+  /* Enable UPDATE interrupt request */
   NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
   NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn,0);
 }
 
 /**
-  * @brief  TIM更新中断回调函数
-  * @param  无
-  * @retval 无
+  * @brief  Period elapsed callback in non blocking mode 
+  * @param  None
+  * @retval None
   */
 void APP_UpdateCallback(void)
 {
-  /* 翻转LED */
-  BSP_LED_Toggle(LED3);
+  /* Toggle LED */
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while(LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频 */
+  /* Set AHB prescaler */
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* Configure HSISYS as system clock source */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频 */
+  /* Set APB1 prescaler */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(8000000);
   
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(8000000);
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
@@ -185,16 +185,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

@@ -42,85 +42,85 @@ static void APP_ExtiConfig(void);
 static void APP_PwrEnterStopMode(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 {
-  /* 开SYSCFG和PWR时钟 */
+  /* Enable SYSCFG and PWR clocks */
   LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SYSCFG);
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
   
-  /* 配置系统时钟 */
+  /* Configure system clock */
   APP_SystemClockConfig();
 
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
   
-  /* 初始化按键BUTTON */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
 
-  /* 配置EXTI */
+  /* Configure EXTI */
   APP_ExtiConfig();
   
-  /* 点亮小灯 */
+  /* Turn on the LED */
   BSP_LED_On(LED_GREEN);
   
-  /* 等待用户按键按下，主机程序开始运行 */
+  /* Wait for the user to press the button to start the main program */
   while (BSP_PB_GetState(BUTTON_KEY) == 1)
   {
   }
   
-  /* 关闭小灯 */
+  /* Turn off the LED */
   BSP_LED_Off(LED_GREEN);
 
-  /* 进入Stop模式，等待PA6引脚下降沿触发，事件唤醒 */
+  /* Enter Stop mode and wait for falling edge trigger on PA6 pin for event wake-up */
   APP_PwrEnterStopMode();
 
   while (1)
   {
-    /* LED灯翻转 */
+    /* Toggle LED */
     BSP_LED_Toggle(LED_GREEN);
-    /* 延时500ms */
+    /* Delay 500ms */
     LL_mDelay(500);
   }
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
-  /* 使能HSI */
+  /* Enable HSI */
   LL_RCC_HSI_Enable();
   while (LL_RCC_HSI_IsReady() != 1)
   {
   }
 
-  /* 设置 AHB 分频*/
+  /* Set AHB prescaler*/
   LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
 
-  /* 配置HSISYS作为系统时钟源 */
+  /* Configure HSISYS as system clock source */
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSISYS);
   while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSISYS)
   {
   }
 
-  /* 设置 APB1 分频*/
+  /* Set APB1 prescaler*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_Init1msTick(8000000);
 
-  /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
+  /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(8000000);
 }
 
 /**
-  * @brief  EXTI配置函数
-  * @param  无
-  * @retval 无
+  * @brief  EXTI configuration function
+  * @param  None
+  * @retval None
   */
 static void APP_ExtiConfig(void)
 {
@@ -128,57 +128,60 @@ static void APP_ExtiConfig(void)
 
   LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
 
-  /* 使能GPIOA */
+  /* Enable GPIOA */
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
 
-  /* 配置输入模式 */
+  /* Configure input mode */
   GPIO_InitStruct.Pin = LL_GPIO_PIN_6;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_UP;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /* 配置EXTI为事件、下降沿触发 */
+  /* Configure EXTI as event, falling edge triggered */
   EXTI_InitStruct.Line = LL_EXTI_LINE_6;
   EXTI_InitStruct.LineCommand = ENABLE;
   EXTI_InitStruct.Mode = LL_EXTI_MODE_EVENT;
   EXTI_InitStruct.Trigger = LL_EXTI_TRIGGER_FALLING;
   LL_EXTI_Init(&EXTI_InitStruct);
   
-  /* 当使用EXTI通道为0~8时需要配置触发端口 */
+  /* When using EXTI channels 0~8, configure the trigger port */
   LL_EXTI_SetEXTISource(LL_EXTI_CONFIG_PORTA,LL_EXTI_CONFIG_LINE6);
 
 }
 
 /**
-  * @brief  进入Stop模式
-  * @param  无
-  * @retval 无
+  * @brief  Enter STOP mode
+  * @param  None
+  * @retval None
   */
 static void APP_PwrEnterStopMode(void)
 {
-  /* 带低功耗调节器的停止模式 */
+  /* Low power STOP voltage 1.0V */
+  LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE2);
+
+  /* Enter stop mode with low power regulator */
   LL_PWR_EnableLowPowerRunMode();
 
-  /* 设置Cortex系统控制寄存器的SLEEPDEEP位 */
+  /* Set SLEEPDEEP bit in Cortex System Control Register */
   LL_LPM_EnableDeepSleep();
 
-  /* 请求等待事件 */
+  /* Request Wait For Event */
   __SEV();
   __WFE();
   __WFE();
 
-  /* 复位Cortex系统控制寄存器的SLEEPDEEP位 */
+  /* Reset SLEEPDEEP bit in Cortex System Control Register */
   LL_LPM_EnableSleep();
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -186,16 +189,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

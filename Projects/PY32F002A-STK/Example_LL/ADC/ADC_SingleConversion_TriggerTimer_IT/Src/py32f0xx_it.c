@@ -93,17 +93,17 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f003xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 void ADC_COMP_IRQHandler(void)
 {
-  /* 检测是不是转换结束触发的中断 */
+  /* heck if it is an interrupt triggered by the end of conversion */
   if(LL_ADC_IsActiveFlag_EOC(ADC1) != 0)
   {
-    /* 清空ADC EOC 中断 */
+    /* Clear ADC EOC interrupt flag */
     LL_ADC_ClearFlag_EOC(ADC1);
 
-    /* 调用中断处理函数 */
+    /* Call the interrupt handler function */
     APP_AdcGrpRegularUnitaryConvCompleteCallback();
   }
 }

@@ -35,7 +35,7 @@
 /* Private includes ----------------------------------------------------------*/
 
 /* Private typedef -----------------------------------------------------------*/
- extern UART_HandleTypeDef UartHandle;
+extern UART_HandleTypeDef UartHandle;
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
@@ -94,7 +94,7 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f002xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 void USART1_IRQHandler(void)
 {

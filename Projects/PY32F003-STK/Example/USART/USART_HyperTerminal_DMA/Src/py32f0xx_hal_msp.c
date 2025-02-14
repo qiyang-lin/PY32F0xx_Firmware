@@ -43,7 +43,7 @@ DMA_HandleTypeDef hdma_usart2_rx;
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -52,17 +52,17 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始化USART的MSP
+  * @brief Initialize USART-related MSP
   */
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
-  /* 使能时钟 */
+  /* Enable clock */
   __HAL_RCC_USART2_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_SYSCFG_CLK_ENABLE();
   __HAL_RCC_DMA_CLK_ENABLE();
   
-  /**USART2引脚配置
+  /**USART2 pin configuration
   PA0     ------> USART2_TX
   PA1     ------> USART2_RX
   */
@@ -75,9 +75,9 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
   
   /* ==================== */
-  /* USART2 DMA相关配置 */
+  /* USART2 DMA configuration */
   /* ==================== */
-  /* USART2_TX 初始化 */
+  /* USART2_TX initialization */
   hdma_usart2_tx.Instance = DMA1_Channel1;
   hdma_usart2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
   hdma_usart2_tx.Init.PeriphInc = DMA_PINC_DISABLE;
@@ -92,7 +92,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   }
 
   __HAL_LINKDMA(&UartHandle, hdmatx, hdma_usart2_tx);
-  /* USART2_RX 初始化 */
+  /* USART2_RX initialization */
   hdma_usart2_rx.Instance = DMA1_Channel2;
   hdma_usart2_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
   hdma_usart2_rx.Init.PeriphInc = DMA_PINC_DISABLE;
@@ -108,7 +108,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef *huart)
   __HAL_LINKDMA(&UartHandle, hdmarx, hdma_usart2_rx);
   /*UART2_TX DMA_CH1-0x7  ; UART2_RX DMA_CH2-0x8*/
   HAL_SYSCFG_DMA_Req(0x0807);
-  /* 使能NVIC */
+  /* Enable NVIC */
   HAL_NVIC_SetPriority(USART2_IRQn, 0, 1);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
   HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 1);

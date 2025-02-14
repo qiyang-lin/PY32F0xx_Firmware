@@ -54,7 +54,7 @@ int main(void)
   /* System clock configuration */
   APP_SystemClockConfig();
   
-  /* UART initialization */
+  /* USART initialization */
   DEBUG_USART_Config();
   
   /* RTC initialization */
@@ -81,8 +81,8 @@ int main(void)
   */
 void HAL_RTCEx_RTCEventCallback(RTC_HandleTypeDef *hrtc)
 {
-  printf("RTC_IT_SEC\r\n");
   APP_RtcTimeShow();
+  printf("RTC_IT_SEC\r\n");
 }
 
 /**

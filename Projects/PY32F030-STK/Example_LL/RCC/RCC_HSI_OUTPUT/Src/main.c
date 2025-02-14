@@ -86,6 +86,10 @@ static void APP_SystemClockConfig(void)
   
   /* Set APB1 prescaler and initialize it */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+
+  /* Set systick to 1ms */
+  LL_Init1msTick(24000000);
+  
   /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(24000000);
 }

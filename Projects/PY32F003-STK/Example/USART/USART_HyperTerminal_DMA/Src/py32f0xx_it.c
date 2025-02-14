@@ -94,10 +94,6 @@ void SysTick_Handler(void)
   */
 void DMA1_Channel1_IRQHandler(void)
 {
-  if (READ_BIT(DMA1->ISR, DMA_ISR_TCIF1) == DMA_ISR_TCIF1)
-  {
-    UartReady = RESET;
-  }
   HAL_DMA_IRQHandler(UartHandle.hdmatx);
 }
 
@@ -106,10 +102,6 @@ void DMA1_Channel1_IRQHandler(void)
   */
 void DMA1_Channel2_3_IRQHandler(void)
 {
-  if (READ_BIT(DMA1->ISR, DMA_ISR_TCIF2) == DMA_ISR_TCIF2)
-  {
-    UartReady = SET;
-  }
   HAL_DMA_IRQHandler(UartHandle.hdmarx);
 }
 

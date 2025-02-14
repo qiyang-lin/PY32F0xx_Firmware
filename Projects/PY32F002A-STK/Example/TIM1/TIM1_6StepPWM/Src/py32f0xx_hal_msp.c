@@ -33,56 +33,56 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
   GPIO_InitTypeDef   GPIO_InitStruct = {0};
 
-  /*TIM1时钟使能 */
+  /*Enable TIM1 clock */
   __HAL_RCC_TIM1_CLK_ENABLE();                              
-  /*GPIOA时钟使能 */
+  /*Enable GPIOA clock */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-  /*复用功能 */
+  /* Alternate function */
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;                   
-  /* 上拉 */
+  /* Pull-up */
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;                       
-  /* 高速*/
+  /* High speed*/
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  /*GPIOA3初始化*/
+  /*Initialize GPIOA Pin 3*/
   GPIO_InitStruct.Pin = GPIO_PIN_3;
   GPIO_InitStruct.Alternate = GPIO_AF13_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /*GPIOA7初始化*/
+  /*Initialize GPIOA Pin 7*/
   GPIO_InitStruct.Pin = GPIO_PIN_7;
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /*GPIOB3初始化*/
+  /*Initialize GPIOB Pin 3*/
   GPIO_InitStruct.Pin = GPIO_PIN_3;
   GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  /*GPIOB0初始化*/
+  /*Initialize GPIOB Pin 0*/
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  /*GPIOA0初始化*/
+  /*Initialize GPIOA Pin 0*/
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Alternate = GPIO_AF13_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /*GPIOB1初始化*/
+  /*Initialize GPIOB Pin 1*/
   GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
  
-  /* 使能TIM1中断 */
+  /* Enable TIM1 interrupt */
   HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
 }

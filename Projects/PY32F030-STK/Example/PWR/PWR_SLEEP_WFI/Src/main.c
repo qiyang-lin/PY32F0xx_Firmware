@@ -55,7 +55,7 @@ int main(void)
   /* Configure external interrupt */
   APP_ExtiConfig();                               
 
-  /* UART configuration */
+  /* USART configuration */
   DEBUG_USART_Config();                         
 
   /* Turn on the LED */

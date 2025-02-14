@@ -42,203 +42,202 @@ __IO uint32_t uwStep = 0;
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
 static void APP_TIM1_INIT(void);
 static void APP_TIM1_PWM(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
 
-  /* TIM1初始化*/
+  /* Initialize TIM1*/
   APP_TIM1_INIT();
 
-  /* TIM1 PWM配置 */
+  /* TIM1 PWM Configuration */
   APP_TIM1_PWM();
 
-  /*配置换相事件：软件方式*/
+  /*Configuration of phase change events: software method*/
   HAL_TIMEx_ConfigCommutEvent_IT(&TimHandle, TIM_TS_NONE, TIM_COMMUTATION_SOFTWARE);
   
-  /* 通道1开始输出PWM */
+  /* Channel 1 starts to output PWM */
   if (HAL_TIM_OC_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)                  
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 通道1N开启 */
+  /* Channel 1N starts to output PWM */
   if (HAL_TIMEx_OCN_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 通道2开始输出PWM */
+  /* Channel 2 starts to output PWM */
   if (HAL_TIM_OC_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)                  
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
   
-  /* 通道2N开启 */
+  /* Channel 2N starts to output PWM */
   if (HAL_TIMEx_OCN_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 通道3开始输出PWM */
+  /* Channel 3 starts to output PWM */
   if (HAL_TIM_OC_Start(&TimHandle, TIM_CHANNEL_3) != HAL_OK)                  
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 通道3N开启 */
+  /* Channel 3N starts to output PWM */
   if (HAL_TIMEx_OCN_Start(&TimHandle, TIM_CHANNEL_3) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 /**
-  * @brief  TIM1初始化函数
-  * @param  无
-  * @retval 无
+  * @brief  Initialize TIM1
+  * @param  None
+  * @retval None
   */
 static void APP_TIM1_INIT(void)
 {
-  /* 选择TIM1 */
+  /* Select TIM1 */
   TimHandle.Instance = TIM1;                                                  
   
-  /* 自动重装载值 */
+  /* Auto-reload value */
   TimHandle.Init.Period            = 1000 - 1;                                     
 
-  /* 预分频为800-1 */
+  /* Prescaler value */
   TimHandle.Init.Prescaler         = 1 - 1;                                 
 
-  /* 时钟不分频 */
+  /* Clock not divided */
   TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;                  
 
-  /* 向上计数*/
+  /* Up-counting mode*/
   TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;                      
   
-  /* 不重复计数 */
+  /* No repetition */
   TimHandle.Init.RepetitionCounter = 1 - 1;                                   
 
-  /* 自动重装载寄存器没有缓冲 */
+  /* Auto-reload register not buffered */
   TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;          
 
-  /* 基础时钟初始化 */
+  /* Initialize clock settings */
   if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                                
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
 }
 /**
-  * @brief  TIM1 PWM配置
-  * @param  无
-  * @retval 无
+  * @brief  TIM1 PWM Configuration
+  * @param  None
+  * @retval None
   */
 static void APP_TIM1_PWM(void)
 {
-  /*输出配置为翻转模式 */
+  /*Output configured for PWM1 mode */
   sConfig1.OCMode       = TIM_OCMODE_PWM1;                                     
 
-  /*OC通道输出高电平有效 */
+  /*OC channel output active high */
   sConfig1.OCPolarity   = TIM_OCPOLARITY_HIGH;                                                                 
 
-  /*OCN通道输出高电平有效 */
+  /*OCN channel output active high */
   sConfig1.OCNPolarity  = TIM_OCNPOLARITY_HIGH;                                
 
-  /*空闲状态OC1N输出低电平 */
+  /*Idle state OC1N output low level */
   sConfig1.OCNIdleState = TIM_OCNIDLESTATE_RESET;                              
 
-  /*空闲状态OC1输出低电平*/
+  /*Idle state OC1 output low level*/
   sConfig1.OCIdleState  = TIM_OCIDLESTATE_RESET;                               
 
-  sConfig1.OCFastMode   = TIM_OCFAST_DISABLE;                         /* 禁用快速模式 */
+  sConfig1.OCFastMode   = TIM_OCFAST_DISABLE;                         /* Disable fast mode */
 
-  /*设置通道1的占空比为 (500/1000)=50% */
+  /*Set the duty cycle of channel 1 to (500/1000)=50% */
   sConfig1.Pulse = 500 - 1;                                              
 
-  /* 通道1配置 */
+  /* Channel 1 configuration */
   if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig1, TIM_CHANNEL_1) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
   sConfig2 = sConfig1;
-  /* 设置通道2的占空比为 (250/1000)=25%*/
+  /* Set the duty cycle of channel 1 to (250/1000)=250%*/
   sConfig2.Pulse = 250 - 1;                                               
 
-  /* 通道2配置 */
+  /* Channel 2 configuration */
   if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig2, TIM_CHANNEL_2) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
   sConfig3 = sConfig1;
-  /* 设置通道1的占空比值为 (125/1000)=12.5% */
+  /* Set the duty cycle of channel 1 to (125/1000)=12.5% */
   sConfig3.Pulse = 125 - 1;                                              
 
-  /* 通道3配置 */
+  /* Channel 3 configuration */
   if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig3, TIM_CHANNEL_3) != HAL_OK)
   {
     /* Configuration Error */
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
 }
 
 /**
-  * @brief  换相事件执行函数，6步输出配置
-  * @param  无
-  * @retval 无
+  * @brief  Phase change event execution function, 6-step output configuration
+  * @param  None
+  * @retval None
   */
 void HAL_TIMEx_CommutCallback(TIM_HandleTypeDef *htim)
 {
   if (uwStep == 0)
   {
-    /*配置为PWM1*/
+    /*Configured as PWM1*/
     sConfig1.OCMode     = TIM_OCMODE_PWM1;                             
-    /*通道1配置为PWM*/
+    /*Channel 1 is configured as PWM*/
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig1, TIM_CHANNEL_1);   
-    /*通道1输出PWM*/
+    /*Channel 1 output PWM*/
     HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);                    
-    /*PWM1N停止输出*/
+    /*Channel 1N stop output*/
     HAL_TIMEx_OCN_Stop(&TimHandle, TIM_CHANNEL_1);                    
 
-    /*配置为PWM1*/
+    /*Configured as PWM1*/
     sConfig3.OCMode     = TIM_OCMODE_PWM1;                             
-    /*通道3配置为PWM */
+    /*Channel 3 is configured as PWM */
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig3, TIM_CHANNEL_3);   
-    /*通道3N使能 */
+    /*Channel 3N output PWM */
     HAL_TIMEx_OCN_Start(&TimHandle, TIM_CHANNEL_3);                   
-    /*通道3PWM停止 */
+    /*Channel 3 stop output */
     HAL_TIM_PWM_Stop(&TimHandle, TIM_CHANNEL_3);                      
 
-    /*停止通道2 */
+    /*Channel 2 stop output */
     HAL_TIM_OC_Stop(&TimHandle, TIM_CHANNEL_2);                       
-    /*停止通道2N */
+    /*Channel 2N stop output */
     HAL_TIMEx_OCN_Stop(&TimHandle, TIM_CHANNEL_2);                   
     uwStep = 1;
   }
 
   else if (uwStep == 1)
   {
-    /*配置为PWM1 */
+    /*Configured as PWM1 */
     sConfig2.OCMode     = TIM_OCMODE_PWM1;                             
-    /*通道2配置为PWM */
+    /*Channel 2 is configured as PWM */
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig2, TIM_CHANNEL_2);   
-    /*通道2N开始*/
+    /*Channel 2N starts output.*/
     HAL_TIMEx_OCN_Start(&TimHandle, TIM_CHANNEL_2);                   
-    /*停止通道3N */
+    /*Channel 3N stop output */
     HAL_TIMEx_OCN_Stop(&TimHandle, TIM_CHANNEL_3);                   
 
     uwStep++;
@@ -246,14 +245,14 @@ void HAL_TIMEx_CommutCallback(TIM_HandleTypeDef *htim)
 
   else if (uwStep == 2)
   {
-    /*配置为PWM1*/
+    /*Configured as PWM1*/
     sConfig3.OCMode     = TIM_OCMODE_PWM1;                             
-    /*通道3配置为PWM*/
+    /*Channel 3 is configured as PWM*/
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig3, TIM_CHANNEL_3);  
-    /*通道3PWM启动*/
+    /*Channel 3 starts output.*/
     HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3);                     
  
-    /*通道1输出关闭*/
+    /*Channel 1 stop output*/
     HAL_TIM_OC_Stop(&TimHandle, TIM_CHANNEL_1);                       
 
     uwStep++;
@@ -261,27 +260,27 @@ void HAL_TIMEx_CommutCallback(TIM_HandleTypeDef *htim)
 
   else if (uwStep == 3)
   {
-    /*停止通道2N*/
+    /*Channel 2N stop output*/
     HAL_TIMEx_OCN_Stop(&TimHandle, TIM_CHANNEL_2);                    
-    /*配置为PWM1*/
+    /*Configured as PWM1*/
     sConfig1.OCMode     = TIM_OCMODE_PWM1;                             
-    /*通道1配置为PWM */
+    /*Channel 1 is configured as PWM */
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig1, TIM_CHANNEL_1);  
-    /*停止通道1N */
+    /*Channel 1N starts output */
     HAL_TIMEx_OCN_Start(&TimHandle, TIM_CHANNEL_1);      
  
     uwStep++;
   }
   else if (uwStep == 4)
   {
-    /* 停止通道3 */
+    /* Channel 3 stop output */
     HAL_TIM_OC_Stop(&TimHandle, TIM_CHANNEL_3);                       
 
-    /* 配置为PWM1 */
+    /* Configured as PWM1 */
     sConfig2.OCMode     = TIM_OCMODE_PWM1;                             
-    /*通道2配置为PWM */
+    /*Channel 2 is configured as PWM */
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig2, TIM_CHANNEL_2);   
-    /* 通道2PWM启动 */
+    /* Channel 2 starts output */
     HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2);                     
 
     uwStep++;
@@ -289,14 +288,14 @@ void HAL_TIMEx_CommutCallback(TIM_HandleTypeDef *htim)
 
   else if (uwStep == 5)
   {
-    /* 配置为PWM1 */
+    /* Configured as PWM1 */
     sConfig3.OCMode     = TIM_OCMODE_PWM1;                             
-    /* 通道3配置为PWM */
+    /* Channel 3 is configured as PWM */
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig3, TIM_CHANNEL_3);  
-    /* 通道3NPWM启动 */
+    /* Channel 3N starts output */
     HAL_TIMEx_OCN_Start(&TimHandle, TIM_CHANNEL_3);                   
 
-    /* 停止通道1N */
+    /* Channel 1N stop output */
     HAL_TIMEx_OCN_Stop(&TimHandle, TIM_CHANNEL_1);                   
 
     uwStep++;
@@ -304,14 +303,14 @@ void HAL_TIMEx_CommutCallback(TIM_HandleTypeDef *htim)
 
   else
   {
-    /* 配置为PWM1 */
+    /* Configured as PWM1 */
     sConfig1.OCMode     = TIM_OCMODE_PWM1;                           
-    /* 通道1配置为PWM*/
+    /* Channel 1 is configured as PWM*/
     HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig1, TIM_CHANNEL_1); 
-    /*通道1输出PWM*/
+    /*Channel 1 output PWM*/
     HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1);                    
 
-    /* 停止通道2 */
+    /* Channel 2 stop output */
     HAL_TIM_OC_Stop(&TimHandle, TIM_CHANNEL_2);                    
 
     uwStep = 1;
@@ -319,13 +318,13 @@ void HAL_TIMEx_CommutCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -333,16 +332,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

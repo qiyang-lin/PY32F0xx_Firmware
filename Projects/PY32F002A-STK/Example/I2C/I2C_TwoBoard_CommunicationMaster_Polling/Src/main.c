@@ -33,10 +33,10 @@
 #include "main.h"
 
 /* Private define ------------------------------------------------------------*/
-#define DATA_LENGTH      15                 /*数据长度*/
-#define I2C_ADDRESS      0xA0               /*本机地址0xA0*/
-#define I2C_SPEEDCLOCK   100000             /*通讯速度100K*/
-#define I2C_DUTYCYCLE    I2C_DUTYCYCLE_16_9 /*占空比*/
+#define DATA_LENGTH      15                 /* Length of data */
+#define I2C_ADDRESS      0xA0              /* Own address 0xA0 */
+#define I2C_SPEEDCLOCK   100000             /* Communication speed 100K */
+#define I2C_DUTYCYCLE    I2C_DUTYCYCLE_16_9 /* Duty cycle */
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef I2cHandle;
 uint8_t aTxBuffer[15] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
@@ -50,12 +50,12 @@ static uint8_t APP_Buffercmp8(uint8_t* pBuffer1, uint8_t* pBuffer2, uint8_t Buff
 static void APP_LedBlinking(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
   /* Initialize LED */
@@ -65,32 +65,32 @@ int main(void)
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
   
   I2cHandle.Instance             = I2C;                                                                    /*I2C*/
-  I2cHandle.Init.ClockSpeed      = I2C_SPEEDCLOCK;                                                        /*I2C通讯速度*/
-  I2cHandle.Init.DutyCycle       = I2C_DUTYCYCLE;                                                         /*I2C占空比*/
-  I2cHandle.Init.OwnAddress1     = I2C_ADDRESS;                                                           /*I2C地址*/
-  I2cHandle.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;                                               /*禁止广播呼叫*/
-  I2cHandle.Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;                                                 /*允许时钟延长*/
+  I2cHandle.Init.ClockSpeed      = I2C_SPEEDCLOCK;                                                        /*I2C communication speed*/
+  I2cHandle.Init.DutyCycle       = I2C_DUTYCYCLE;                                                         /*I2C Duty cycle*/
+  I2cHandle.Init.OwnAddress1     = I2C_ADDRESS;                                                           /*I2C address*/
+  I2cHandle.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;                                               /*Disable general call*/
+  I2cHandle.Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;                                                 /*Enable clock stretching*/
 
-  if (HAL_I2C_Init(&I2cHandle) != HAL_OK)                                                                 /*I2C初始化*/
+  if (HAL_I2C_Init(&I2cHandle) != HAL_OK)                                                                 /*I2C Initialisation*/
   {
-    APP_Error_Handler();
+    APP_ErrorHandler();
   }
-  /*等待用户按键按下，主机程序开始运行*/
+  /*Wait for user button press to start the main program*/
   while (BSP_PB_GetState(BUTTON_KEY) == 1)
   {
   }
 
-  /*I2C主机中断方式发送*/
+  /*I2C master interrupt mode transmission*/
   while (HAL_I2C_Master_Transmit(&I2cHandle, I2C_ADDRESS, (uint8_t *)aTxBuffer, DATA_LENGTH,5000) != HAL_OK)
   {
-    APP_Error_Handler();
+    APP_ErrorHandler();
   }
-  /*判断当前I2C状态*/
+  /*Check the current I2C state*/
   while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY);
-  /*I2C主机中断方式接收*/
+  /*I2C master interrupt mode reception*/
   while (HAL_I2C_Master_Receive(&I2cHandle, I2C_ADDRESS, (uint8_t *)aRxBuffer, DATA_LENGTH,5000) != HAL_OK)
   {
-    APP_Error_Handler();
+    APP_ErrorHandler();
   }
   
   /* Check the current I2C state */
@@ -162,13 +162,13 @@ static void APP_LedBlinking(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void APP_Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -176,16 +176,17 @@ void APP_Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

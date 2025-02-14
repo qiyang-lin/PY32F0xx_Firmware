@@ -40,24 +40,24 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始TIM相关MSP
+  * @brief Initialize TIM-related MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
-  /* 使能TIM1时钟 */
+  /* Enable TIM1 clock */
   __HAL_RCC_TIM1_CLK_ENABLE();
   
-  /* 设置中断优先级 */
+  /* Set interrupt priority */
   HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 0, 0);
   
-  /* 使能TIM1中断 */
+  /* Enable TIM1 interrupt */
   HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
 }
 

@@ -46,48 +46,47 @@ TIM_OC_InitTypeDef sConfig;
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
 static void APP_TIM1_INIT(void);
 static void APP_TIM1_PWM(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
   APP_TIM1_INIT();
 
   APP_TIM1_PWM();
 
-  /* 通道1开始输出PWM */
+  /* Start PWM output on Channel 1 */
   if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)                  
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 通道2开始输出PWM */
+  /* Start PWM output on Channel 2 */
   if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_2) != HAL_OK)                  
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 通道3开始输出PWM */
+  /* Start PWM output on Channel 3 */
   if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_3) != HAL_OK)                  
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 通道4开始输出PWM */
+  /* Start PWM output on Channel 4 */
   if (HAL_TIM_PWM_Start(&TimHandle, TIM_CHANNEL_4) != HAL_OK)                  
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
 
@@ -95,111 +94,111 @@ int main(void)
   }
 }
 /**
-  * @brief  TIM1初始化函数
-  * @param  无
-  * @retval 无
+  * @brief  Initialize TIM1
+  * @param  None
+  * @retval None
   */
 static void APP_TIM1_INIT(void)
 {
-  /* 选择TIM1 */
+  /* Select TIM1 */
   TimHandle.Instance = TIM1;                                                  
   
-  /* 自动重装载值 */
+  /* Auto-reload value */
   TimHandle.Init.Period            = 50;                                     
 
-  /* 预分频为800-1 */
+  /* Prescaler value */
   TimHandle.Init.Prescaler         = 800 - 1;                                 
 
-  /* 时钟不分频 */
+  /* Clock not divided */
   TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;                  
 
-  /* 向上计数*/
+  /* Up-counting mode*/
   TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;                      
 
-  /* 不重复计数 */
+  /* No repetition */
   TimHandle.Init.RepetitionCounter = 1 - 1;                                   
 
-  /* 自动重装载寄存器没有缓冲 */
+  /* Auto-reload register not buffered */
   TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;          
 
-  /* 基础时钟初始化 */
+  /* Initialize clock settings */
   if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                                
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
 }
 /**
-  * @brief  TIM1 PWM配置
-  * @param  无
-  * @retval 无
+  * @brief  TIM1 PWM Configuration
+  * @param  None
+  * @retval None
   */
 static void APP_TIM1_PWM(void)
 {
-  /*输出配置为翻转模式 */
+  /*Output configured for PWM1 mode */
   sConfig.OCMode       = TIM_OCMODE_PWM1;                                     
 
-  /*OC通道输出高电平有效 */
+  /*OC channel output active high */
   sConfig.OCPolarity   = TIM_OCPOLARITY_HIGH;                                 
 
-  /*输出快速使能关闭 */
+  /*Disable the output compare fast mode */
   sConfig.OCFastMode   = TIM_OCFAST_DISABLE;                                  
 
-  /*OCN通道输出高电平有效 */
+  /*OCN channel output active high */
   sConfig.OCNPolarity  = TIM_OCNPOLARITY_HIGH;                                
 
-  /*空闲状态OC1N输出低电平 */
+  /*Idle state OC1N output low level */
   sConfig.OCNIdleState = TIM_OCNIDLESTATE_RESET;                              
 
-  /*空闲状态OC1输出低电平*/
+  /*Idle state OC1 output low level*/
   sConfig.OCIdleState  = TIM_OCIDLESTATE_RESET;                               
 
-  /*CC1值为10，占空比=10/50=20%*/
+  /*Set CC1 pulse value to 10, resulting in a duty cycle of 10/50 = 20%*/
   sConfig.Pulse = PULSE1_VALUE;                                              
 
-  /* 通道1配置 */
+  /* Channel 1 configuration */
   if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_1) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* CC2值为20,占空比=20/50=40% */
+  /*Set CC2 pulse value to 20, resulting in a duty cycle of 20/50 = 40% */
   sConfig.Pulse = PULSE2_VALUE;                                               
 
-  /* 通道2配置 */
+  /* Configure Channel 2 for PWM */
   if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_2) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /*CC3值为30,占空比=30/50=60%*/
+  /*Set CC3 pulse value to 30, resulting in a duty cycle of 30/50 = 60%*/
   sConfig.Pulse = PULSE3_VALUE;                                              
 
-  /* 通道3配置 */
+  /* Configure Channel 3 for PWM */
   if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_3) != HAL_OK)
   {
     /* Configuration Error */
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* CC4值为40,占空比=40/50=80% */
+  /* Set CC4 pulse value to 40, resulting in a duty cycle of 40/50 = 80% */
   sConfig.Pulse = PULSE4_VALUE;                                               
 
-  /*通道4配置 */
+  /*Configure Channel 4 for PWM */
   if (HAL_TIM_PWM_ConfigChannel(&TimHandle, &sConfig, TIM_CHANNEL_4) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -207,16 +206,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

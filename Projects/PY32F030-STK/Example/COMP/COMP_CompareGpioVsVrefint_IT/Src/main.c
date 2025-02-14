@@ -37,7 +37,6 @@ COMP_HandleTypeDef  hcomp1;
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void APP_ErrorHandler(void);
 
 /**
   * @brief  Main program.
@@ -84,7 +83,7 @@ int main(void)
   */
 void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp)
 {
-  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_11);
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 /**

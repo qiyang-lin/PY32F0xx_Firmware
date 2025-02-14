@@ -86,7 +86,7 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f003xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

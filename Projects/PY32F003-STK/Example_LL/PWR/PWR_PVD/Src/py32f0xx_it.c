@@ -94,13 +94,12 @@ void SysTick_Handler(void)
   */
 void PVD_IRQHandler(void)
 {
-  if (LL_PWR_IsActiveFlag_PVDO())
+  /* Handle EXTI interrupt request */
+  if(LL_EXTI_IsActiveFlag(LL_EXTI_LINE_16))
   {
-    BSP_LED_On(LED_GREEN);
-  }
-  else
-  {
-    BSP_LED_Off(LED_GREEN);
+    LL_EXTI_ClearFlag(LL_EXTI_LINE_16);
+    
+    APP_PvdCallback();
   }
 }
 

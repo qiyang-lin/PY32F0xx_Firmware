@@ -40,14 +40,14 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化ADC相关MSP
+  * @brief Initialize ADC-related MSP
   */
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
@@ -58,7 +58,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 }
 
 /**
-  * @brief 反初始化ADC相关MSP
+  * @brief Deinitialize ADC-related MSP
   */
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef *hadc)
 {

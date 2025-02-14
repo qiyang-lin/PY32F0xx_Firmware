@@ -40,20 +40,20 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
-  /* 清除所有复位标志位 */
+  /* Clear all reset flags */
   __HAL_RCC_CLEAR_RESET_FLAGS();
 }
 
 /**
-  * @brief 初始化WWDG相关MSP
+  * @brief Initialize WWDG-related MSP
   */
 void HAL_WWDG_MspInit(WWDG_HandleTypeDef *hwwdg)
 {
-  /* WWDG 时钟使能 */
+  /* Enable WWDG clock */
   __HAL_RCC_WWDG_CLK_ENABLE();
   NVIC_SetPriority(WWDG_IRQn, 0);
   NVIC_EnableIRQ(WWDG_IRQn);

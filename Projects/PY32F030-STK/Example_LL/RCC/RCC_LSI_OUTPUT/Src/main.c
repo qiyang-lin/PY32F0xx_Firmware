@@ -66,7 +66,6 @@ int main(void)
   */
 static void APP_SystemClockConfig(void)
 {
-  
   /* Enable and initialize LSI */
   LL_RCC_LSI_Enable();
   while(LL_RCC_LSI_IsReady() != 1)
@@ -81,11 +80,13 @@ static void APP_SystemClockConfig(void)
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_LSI)
   {
   }
-  
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-  
-  /* Set APB1 prescaler and initialize it */
+
+  /* Set APB1 prescaler */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+
+  /* Set systick to 1ms */
+  LL_Init1msTick(LSI_VALUE);
+
   /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(LSI_VALUE);
 }

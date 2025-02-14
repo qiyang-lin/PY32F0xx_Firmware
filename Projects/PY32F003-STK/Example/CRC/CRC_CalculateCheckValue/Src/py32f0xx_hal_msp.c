@@ -40,7 +40,7 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -48,20 +48,20 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief  初始化CRC的MSP
-  * @param  hcrc：CRC句柄
-  * @retval 无
+  * @brief  Initialize CRC-related MSP
+  * @param  hcrc：CRC handle
+  * @retval None
   */
 void HAL_CRC_MspInit(CRC_HandleTypeDef *hcrc)
 {
-  /* CRC 时钟使能 */
+  /* CRC Peripheral clock enable */
   __HAL_RCC_CRC_CLK_ENABLE();
 }
 
 /**
-  * @brief  反初始化CRC的MSP
-  * @param  hcrc：CRC句柄
-  * @retval 无
+  * @brief  Deinitialize CRC-related MSP
+  * @param  hcrc：CRC handle
+  * @retval None
   */
 void HAL_CRC_MspDeInit(CRC_HandleTypeDef *hcrc)
 {

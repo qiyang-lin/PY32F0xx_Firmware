@@ -224,8 +224,8 @@ HAL_StatusTypeDef HAL_RCC_DeInit(void)
     }
   }
 
-  /* Set ICSCR to the reset value */
-  RCC->ICSCR = 0x00FF10FF;
+  /* Set the HSI clock to 8MHz by default */
+  __HAL_RCC_HSI_CALIBRATIONVALUE_ADJUST(RCC_HSICALIBRATION_8MHz);
 
   /* Get Start Tick*/
   tickstart = HAL_GetTick();

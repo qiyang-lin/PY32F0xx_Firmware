@@ -493,7 +493,7 @@ typedef struct
 #define RCC_RTCCLKSOURCE_LSE           RCC_BDCR_RTCSEL_0      /*!< LSE oscillator clock used as RTC clock */
 #endif
 #define RCC_RTCCLKSOURCE_LSI           RCC_BDCR_RTCSEL_1      /*!< LSI oscillator clock used as RTC clock */
-#define RCC_RTCCLKSOURCE_HSE_DIV128    RCC_BDCR_RTCSEL        /*!< HSE oscillator clock divided by 32 used as RTC clock */
+#define RCC_RTCCLKSOURCE_HSE_DIV128    RCC_BDCR_RTCSEL        /*!< HSE oscillator clock divided by 128 used as RTC clock */
 /**
   * @}
   */

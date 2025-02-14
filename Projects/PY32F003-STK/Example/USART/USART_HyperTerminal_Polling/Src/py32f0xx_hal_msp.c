@@ -40,7 +40,7 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -49,15 +49,15 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始化USART的MSP
+  * @brief Initialize USART-related MSP
   */
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
-  /* 使能时钟 */
+  /* Enable clock */
   __HAL_RCC_USART2_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   
-  /**USART2引脚配置
+  /**USART2 pin configuration
   PA0     ------> USART2_TX
   PA1   ------> USART2_RX
   */

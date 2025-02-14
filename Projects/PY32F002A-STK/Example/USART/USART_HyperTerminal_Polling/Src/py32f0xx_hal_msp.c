@@ -33,7 +33,7 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -41,16 +41,16 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
  void HAL_UART_MspInit(UART_HandleTypeDef *huart)
  {
    GPIO_InitTypeDef  GPIO_InitStruct = {0};
    
-    /*USART1时钟使能*/
+    /*Enable USART1 clock*/
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_USART1_CLK_ENABLE();
-    /* GPIO初始化
+    /* Initialize GPIO
     PA2 TX,PA3 RX
     */
     GPIO_InitStruct.Pin       = GPIO_PIN_2;

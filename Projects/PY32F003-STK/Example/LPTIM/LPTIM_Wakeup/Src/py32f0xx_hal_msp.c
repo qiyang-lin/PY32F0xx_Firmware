@@ -40,14 +40,14 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief   初始化全局MSP
+  * @brief   Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 
-  /* 设置LPTIM中断优先级 */
+  /* Set LPTIM interrupt priority */
   HAL_NVIC_SetPriority(LPTIM1_IRQn, 0x01,  0);                     
-  /* 使能LPTIM全局中断 */
+  /* Enable LPTIM global interrupt */
   HAL_NVIC_EnableIRQ(LPTIM1_IRQn);                                 
 }
 

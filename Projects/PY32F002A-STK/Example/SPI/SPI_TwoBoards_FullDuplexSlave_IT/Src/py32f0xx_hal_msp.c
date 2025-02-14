@@ -33,22 +33,22 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
  void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
  {
    GPIO_InitTypeDef  GPIO_InitStruct = {0};
  
-    __HAL_RCC_GPIOB_CLK_ENABLE();                   /* GPIOB时钟使能 */
-    __HAL_RCC_GPIOA_CLK_ENABLE();                   /* GPIOA时钟使能 */
-    __HAL_RCC_SPI1_CLK_ENABLE();                    /* SPI1时钟使能 */
+    __HAL_RCC_GPIOB_CLK_ENABLE();                   /* Enable GPIOB clock */
+    __HAL_RCC_GPIOA_CLK_ENABLE();                   /* Enable GPIOA clock */
+    __HAL_RCC_SPI1_CLK_ENABLE();                    /* Enable SPI1 clock */
 
     /*SCK*/
     GPIO_InitStruct.Pin       = GPIO_PIN_3;
@@ -74,14 +74,14 @@ void HAL_MspInit(void)
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
 
-    /*GPIO配置为SPI：MISO/MOSI*/
+    /*Configure GPIO as SPI: MISO/MOSI*/
     GPIO_InitStruct.Pin       = GPIO_PIN_6 | GPIO_PIN_7;
     GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull      = GPIO_NOPULL;
     GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF0_SPI1;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    /*中断配置*/
+    /*Interrupt configuration*/
     HAL_NVIC_SetPriority(SPI1_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(SPI1_IRQn);
  

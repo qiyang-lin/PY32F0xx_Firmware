@@ -40,14 +40,14 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化ADC相关MSP
+  * @brief Initialize ADC-related MSP
   */
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
@@ -55,11 +55,11 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 
   if (hadc->Instance == ADC1)
   {
-    /* 使能ADC时钟 */
+    /* Enable ADC clock */
     __HAL_RCC_ADC_CLK_ENABLE();
 
     __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**ADC GPIO 配置
+    /**ADC GPIO Configuration
     PA0     ------> ADC_IN0
     PA1     ------> ADC_IN1
     */

@@ -169,6 +169,23 @@ static void APP_PvdConfig(void)
 }
 
 /**
+  * @brief  PVD interrupt callback
+  * @param  None
+  * @retval None
+  */
+void APP_PvdCallback(void)
+{
+  if (LL_PWR_IsActiveFlag_PVDO())
+  {
+    BSP_LED_On(LED_GREEN);
+  }
+  else
+  {
+    BSP_LED_Off(LED_GREEN);
+  }
+}
+
+/**
   * @brief  This function is executed in case of error occurrence.
   * @param  None
   * @retval None

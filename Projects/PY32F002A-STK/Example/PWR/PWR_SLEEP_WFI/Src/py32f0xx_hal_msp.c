@@ -33,11 +33,11 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
-  __HAL_RCC_PWR_CLK_ENABLE();                   /*PWR时钟使能*/
+  __HAL_RCC_PWR_CLK_ENABLE();                   /*PWR Clock Enable*/
   BSP_LED_Init(LED_GREEN);
   BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
 }

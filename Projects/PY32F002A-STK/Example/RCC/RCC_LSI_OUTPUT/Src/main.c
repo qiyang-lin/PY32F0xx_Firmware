@@ -38,64 +38,63 @@
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
 void APP_EnbaleLSI(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* 初始化按键BUTTON */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
 
-  /*等待按键按下*/
+  /*Wait for button press*/
   while(BSP_PB_GetState(BUTTON_KEY) == 1);
 
-  /* 系统时钟配置 */
+  /* System clock configuration */
   APP_EnbaleLSI();
   
-  /* 配置PA01引脚为MCO功能，输出LSI时钟 */
+  /* Configure PA01 pin as MCO function to output LSI clock */
   HAL_RCC_MCOConfig(RCC_MCO2, RCC_MCO1SOURCE_LSI, RCC_MCODIV_1);
   
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 
 /**
-  * @brief  使能LSI
-  * @param  无
-  * @retval 无
+  * @brief  Enable LSI
+  * @param  None
+  * @retval None
   */
 void APP_EnbaleLSI(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
 
-  /* 振荡器配置 */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI;        /* 选择振荡器LSI */
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;                          /* 打开LSI */
+  /* Oscillator Configuration */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI;        /* Configure the clock sources: LSI */
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;                          /* Enable LSI */
 
-  /* 配置振荡器 */
+  /* Initialize RCC oscillators */
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -103,16 +102,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

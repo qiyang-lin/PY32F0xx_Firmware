@@ -41,15 +41,15 @@
 void Configure_EXTI(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  Configure_EXTI();                             /* 配置外部中断 */
+  Configure_EXTI();                             /* Configure external interrupt */
   while (1)
   {
 
@@ -59,34 +59,34 @@ int main(void)
 
 
 /**
-  * @brief  配置外部中断引脚
-  * @param  无
-  * @retval 无
+  * @brief  Configure EXTI
+  * @param  None
+  * @retval None
   */
 void Configure_EXTI(void)
 {
   GPIO_InitTypeDef  GPIO_InitStruct = {0};
 
-  __HAL_RCC_GPIOB_CLK_ENABLE();                   /* 使能GPIOB时钟 */
+  __HAL_RCC_GPIOB_CLK_ENABLE();                   /* Enable GPIOB clock */
 
-  GPIO_InitStruct.Mode  = GPIO_MODE_IT_FALLING;   /* GPIO模式为下降沿中断 */
-  GPIO_InitStruct.Pull  = GPIO_PULLUP;            /* 上拉 */
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;   /* 速度为高速 */
+  GPIO_InitStruct.Mode  = GPIO_MODE_IT_FALLING;   /* GPIO mode set to falling edge interrupt */
+  GPIO_InitStruct.Pull  = GPIO_PULLUP;            /* Pull-up */
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;   /* High-speed */
   GPIO_InitStruct.Pin = GPIO_PIN_2;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);                /* 使能EXTI中断 */
-  HAL_NVIC_SetPriority(EXTI2_3_IRQn, 0, 0);        /* 配置中断优先级 */
+  HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);                /* Enable EXTI interrupt */
+  HAL_NVIC_SetPriority(EXTI2_3_IRQn, 0, 0);        /* Configure interrupt priority */
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -94,16 +94,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

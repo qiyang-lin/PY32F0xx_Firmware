@@ -71,8 +71,8 @@ int main(void)
   Spi1Handle.Init.CLKPhase          = SPI_PHASE_1EDGE ;           /* Data sampling on the first clock edge */
   Spi1Handle.Init.DataSize          = SPI_DATASIZE_8BIT;          /* SPI data size: 8-bit */
   Spi1Handle.Init.FirstBit          = SPI_FIRSTBIT_MSB;           /* MSB transmitted first */
-  Spi1Handle.Init.NSS               = SPI_NSS_HARD_INPUT;         /* NSS software mode */
-  Spi1Handle.Init.SlaveFastMode     = SPI_SLAVE_FAST_MODE_DISABLE; /* Enable fast mode */
+  Spi1Handle.Init.NSS               = SPI_NSS_HARD_INPUT;         /* NSS hardware input mode */
+  Spi1Handle.Init.SlaveFastMode     = SPI_SLAVE_FAST_MODE_DISABLE; /* Disable fast mode */
   Spi1Handle.Init.Mode = SPI_MODE_SLAVE;                          /* Configured as slave */
   if (HAL_SPI_DeInit(&Spi1Handle) != HAL_OK)                      /* SPI deinitialization */
   {

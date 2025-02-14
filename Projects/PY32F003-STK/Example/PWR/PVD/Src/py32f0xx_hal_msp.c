@@ -40,11 +40,11 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
-  /* 使能PWR时钟 */
+  /* Enable PWR clock */
   __HAL_RCC_PWR_CLK_ENABLE();
 }
 

@@ -80,7 +80,7 @@ int main(void)
   }
   /* Check the current I2C state */
   while (HAL_I2C_GetState(&I2cHandle) != HAL_I2C_STATE_READY);
-  /* I2C slave interrupt mode receive */
+  /* I2C slave interrupt mode transmit */
   while (HAL_I2C_Slave_Transmit_IT(&I2cHandle, (uint8_t *)aTxBuffer, DATA_LENGTH) != HAL_OK)
   {
     APP_ErrorHandler();

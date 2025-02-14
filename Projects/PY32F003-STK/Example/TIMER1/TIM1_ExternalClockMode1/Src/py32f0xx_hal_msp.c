@@ -40,21 +40,21 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief   初始化全局MSP
+  * @brief   Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief   初始TIM相关MSP
+  * @brief   Initialize TIM-related MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
   GPIO_InitTypeDef   GPIO_InitStruct = {0};
-  __HAL_RCC_TIM1_CLK_ENABLE();                         /* 使能TIM1时钟 */
-  __HAL_RCC_GPIOA_CLK_ENABLE();                        /* GPIOA时钟使能 */
-  /* 设置PA12为TIM1_ETR */
+  __HAL_RCC_TIM1_CLK_ENABLE();                         /* Enable TIM1 clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                        /* Enable GPIOA clock */
+  /* Configure PA12 as TIM1_ETR */
   GPIO_InitStruct.Pin = GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
@@ -62,7 +62,8 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 0, 0);  /* 设置TIM中断优先级 */
+  /* Enable TIM interrupt */
+  HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
 
 }

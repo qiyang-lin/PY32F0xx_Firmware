@@ -94,13 +94,13 @@ void SysTick_Handler(void)
   */
 void DMA1_Channel1_IRQHandler(void)
 {
-  /* 检查 DMA 的 TCIF1 标志位 */
+  /* Check TCIF1 flag bit of DMA */
   if(LL_DMA_IsActiveFlag_TC1(DMA1) == 1)
   {
-    /* 清 DMA 的 TCIF1 标志位 */
+    /* Clear the TCIF1 flag bit of the DMA */
     LL_DMA_ClearFlag_TC1(DMA1);
     
-    /* 调用DMA完成回调函数 */
+    /* Calling the DMA completion callback function */
     APP_DMATransferCompleteCallback();
   }
 }

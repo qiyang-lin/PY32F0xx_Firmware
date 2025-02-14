@@ -40,80 +40,79 @@ uint32_t CC1_Capture = 0;
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void APP_ErrorHandler(void);
 
 /**
-  * @brief   应用程序入口函数
+  * @brief   Main program.
   * @retval  int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
 
-  /* UART初始化 */
+  /* USART initialization */
   DEBUG_USART_Config();
 
-  TimHandle.Instance = TIM3;                                                     /* 选择TIM3 */
-  TimHandle.Init.Period            = 6400 - 1;                                   /* 自动重装载值 */
-  TimHandle.Init.Prescaler         = 1000 - 1;                                   /* 预分频为1000-1 */
-  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;                     /* 时钟不分频 */
-  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;                         /* 向上计数 */
-  TimHandle.Init.RepetitionCounter = 1 - 1;                                      /* 不重复计数 */
-  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;             /* 自动重装载寄存器没有缓冲 */
-  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                                   /* TIM1初始化 */
+  TimHandle.Instance = TIM3;                                                     /* Select TIM3 */
+  TimHandle.Init.Period            = 6400 - 1;                                   /* Auto-reload value */
+  TimHandle.Init.Prescaler         = 1000 - 1;                                   /* Prescaler */
+  TimHandle.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;                     /* No clock division */
+  TimHandle.Init.CounterMode       = TIM_COUNTERMODE_UP;                         /* Up counting */
+  TimHandle.Init.RepetitionCounter = 1 - 1;                                      /* No repetition counting */
+  TimHandle.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;             /* Auto-reload register not buffered */
+  if (HAL_TIM_Base_Init(&TimHandle) != HAL_OK)                                   /* Initialize TIM1 */
   {
     APP_ErrorHandler();
   }
-  /* 通道1捕获配置情况 */
-  sICConfig.ICPolarity  = TIM_ICPOLARITY_RISING;                                 /* 上升沿捕获 */
-  sICConfig.ICSelection = TIM_ICSELECTION_DIRECTTI;                              /* CC1通道配置为输入 */
-  sICConfig.ICPrescaler = TIM_ICPSC_DIV1;                                        /* 输入不分频 */
-  sICConfig.ICFilter    = 0;                                                     /* 输入无滤波 */
-  if (HAL_TIM_IC_ConfigChannel(&TimHandle, &sICConfig, TIM_CHANNEL_1) != HAL_OK) /* 通道1输入捕获配置 */
+  /* Configuration of Channel 1 capture */
+  sICConfig.ICPolarity  = TIM_ICPOLARITY_RISING;                                 /* Rising edge capture */
+  sICConfig.ICSelection = TIM_ICSELECTION_DIRECTTI;                              /* Configure CC1 channel as input */
+  sICConfig.ICPrescaler = TIM_ICPSC_DIV1;                                        /* No input prescaler */
+  sICConfig.ICFilter    = 0;                                                     /* No filter on input */
+  if (HAL_TIM_IC_ConfigChannel(&TimHandle, &sICConfig, TIM_CHANNEL_1) != HAL_OK) /* Configure input capture for channel 1 */
   {
     APP_ErrorHandler();
   }
 
-  if (HAL_TIM_IC_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)                     /* 启动通道1输入捕获 */
+  if (HAL_TIM_IC_Start(&TimHandle, TIM_CHANNEL_1) != HAL_OK)                     /* Start input capture for channel 1 */
   {
     APP_ErrorHandler();
   }
-  __HAL_TIM_ENABLE_DMA(&TimHandle, TIM_DMA_CC1);                                 /* 使能指定DMA请求 */
-  if (HAL_TIM_Base_Start(&TimHandle) != HAL_OK)                                  /* TIM3使能启动，并使能中断 */
+  __HAL_TIM_ENABLE_DMA(&TimHandle, TIM_DMA_CC1);                                 /* Enable specified DMA request */
+  if (HAL_TIM_Base_Start(&TimHandle) != HAL_OK)                                  /* Start TIM3 and enable interrupts */
   {
     APP_ErrorHandler();
   }
   while (1)
   {
-    printf("CC1_Capture = 0x%x\r\n ", CC1_Capture);
+    printf("CC1_Capture = 0x%x\r\n ", (unsigned int)CC1_Capture);
   }
 }
 
 /**
-  * @brief   错误执行函数
-  * @param   无
-  * @retval  无
+  * @brief   This function is executed in case of error occurrence.
+  * @param   None
+  * @retval  None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

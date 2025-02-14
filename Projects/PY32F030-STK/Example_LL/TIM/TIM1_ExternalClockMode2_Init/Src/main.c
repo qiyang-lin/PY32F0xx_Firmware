@@ -54,7 +54,7 @@ int main(void)
   APP_SystemClockConfig();
   
   /* Initialize LED */
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   
   /* Configure external clock mode 2 */
   APP_ConfigTIM1ExternalClock();
@@ -137,7 +137,7 @@ static void APP_ConfigTIM1Count(void)
 void APP_UpdateCallback(void)
 {
   /* Toggle LED */
-  BSP_LED_Toggle(LED3);
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 

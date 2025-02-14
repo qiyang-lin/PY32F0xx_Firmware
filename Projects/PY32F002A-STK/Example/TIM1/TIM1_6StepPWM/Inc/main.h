@@ -43,7 +43,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void APP_ErrorHandler(void);
 
 #define TIMx                           TIM1
 #define TIMx_CLK_ENABLE()              __HAL_RCC_TIM1_CLK_ENABLE()

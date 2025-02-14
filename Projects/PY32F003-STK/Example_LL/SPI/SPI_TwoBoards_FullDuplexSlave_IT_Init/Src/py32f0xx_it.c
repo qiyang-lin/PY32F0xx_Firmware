@@ -93,22 +93,22 @@ void SysTick_Handler(void)
   */
 void SPI1_IRQHandler(void)
 {
-  /* 检查 ISR 寄存器中的 RXNE 标志值 */
+  /* Check RXNE flag value in ISR register */
   if(LL_SPI_IsActiveFlag_RXNE(SPI1))
   {
-    /* 调用接收回调 */
+    /* Calling the receive callback */
     APP_SpiRxCallback();
   }
   /* Check RXNE flag value in ISR register */
   else if(LL_SPI_IsActiveFlag_TXE(SPI1))
   {
-    /* 调用发送回调 */
+    /* Calling the send callback */
     APP_SpiTxCallback();
   }
-  /* 检查 ISR 寄存器中的 STOP 标志值 */
+  /* Checking the value of the STOP flag in the ISR register */
   else if(LL_SPI_IsActiveFlag_OVR(SPI1))
   {
-    /* 调用错误函数 */
+    /* Call error function */
     APP_SpiTransferErrorCallback();
   }
 }

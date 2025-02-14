@@ -63,9 +63,6 @@ int main(void)
   /* Initialize clock, configure system clock as LSE */
   APP_SystemClockConfig();
   
-  /* Initialize SysTick */
-  LL_Init1msTick(LSE_VALUE);
-
   while (1)
   {
     /* Toggle LED */
@@ -105,10 +102,12 @@ static void APP_SystemClockConfig(void)
   {
   }
 
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-
   /* Set APB1 prescaler and initialize it */
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+
+  /* Set systick to 1ms */
+  LL_Init1msTick(LSE_VALUE);
+  
   /* Update system clock global variable SystemCoreClock (can also be updated by calling SystemCoreClockUpdate function) */
   LL_SetSystemCoreClock(LSE_VALUE);
 }

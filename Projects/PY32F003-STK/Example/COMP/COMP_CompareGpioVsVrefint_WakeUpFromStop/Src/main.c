@@ -34,6 +34,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 COMP_HandleTypeDef hcomp1;
+PWR_StopModeConfigTypeDef PwrStopModeConf = {0};
 
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -44,48 +45,56 @@ static void APP_CompIt(void);
 static void APP_LedRun(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
 
-  /* 初始化按键 */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
   
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  /* 关闭systick中断 */
-  HAL_SuspendTick();
-
-  /* 时钟设置初始化 */
+  /* Initialize clock settings */
   APP_RccInit();
 
-  /* COMP初始化 */
+  /* Initialize COMP */
   APP_CompInit();
 
-  /* 中断使能 */
+  /* Enable interrupts */
   APP_CompIt();
   
-  /* COMP启动 */
+  /* Start COMP */
   HAL_COMP_Start(&hcomp1);
 
   BSP_LED_On(LED_GREEN);
 
-  /* 等待按键按下 */
+  /* Wait for button press */
   while (BSP_PB_GetState(BUTTON_USER) != 0)
   {
   }
 
   BSP_LED_Off(LED_GREEN);
 
-  /* 进入STOP模式 */
+  /* Suspend SysTick interrupt */
+  HAL_SuspendTick();
+
+  /* VCORE = 1.0V  when enter stop mode */
+  PwrStopModeConf.LPVoltSelection       =  PWR_STOPMOD_LPR_VOLT_SCALE2;
+  PwrStopModeConf.FlashDelay            =  PWR_WAKEUP_FLASH_DELAY_5US;
+  PwrStopModeConf.WakeUpHsiEnableTime   =  PWR_WAKEUP_HSIEN_AFTER_MR;
+  PwrStopModeConf.RegulatorSwitchDelay  =  PWR_WAKEUP_LPR_TO_MR_DELAY_2US;
+  PwrStopModeConf.SramRetentionVolt     =  PWR_SRAM_RETENTION_VOLT_VOS;
+  HAL_PWR_ConfigStopMode(&PwrStopModeConf);
+
+  /* Enter STOP mode */
   HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 
-  /* 恢复systick中断 */
+  /* Resume the SysTick interrupt */
   HAL_ResumeTick();
   HAL_Delay(1000);
   while (1)
@@ -95,63 +104,63 @@ int main(void)
 }
 
 /**
-  * @brief  时钟初始化
-  * @param  无
-  * @retval 无
+  * @brief  Initialize clock
+  * @param  None
+  * @retval None
   */
 static void APP_RccInit(void)
 {
   RCC_OscInitTypeDef RCCCONF       = {0};
   RCC_PeriphCLKInitTypeDef COMPRCC = {0};
 
-  RCCCONF.OscillatorType = RCC_OSCILLATORTYPE_LSI;        /* RCC使用内部LSI */
-  RCCCONF.LSIState = RCC_LSI_ON;                          /* 开启LSI */
+  RCCCONF.OscillatorType = RCC_OSCILLATORTYPE_LSI;        /* RCC uses internal LSI */
+  RCCCONF.LSIState = RCC_LSI_ON;                          /* Enable LSI */
 
-  COMPRCC.PeriphClockSelection = RCC_PERIPHCLK_COMP1;     /* RCC扩展外设时钟为RTC */
-  COMPRCC.Comp1ClockSelection = RCC_COMP1CLKSOURCE_LSC;   /* 外设独立时钟源选择LSC */
+  COMPRCC.PeriphClockSelection = RCC_PERIPHCLK_COMP1;     /* Peripheral selection: COMP1 */
+  COMPRCC.Comp1ClockSelection = RCC_COMP1CLKSOURCE_LSC;   /* Independent clock source for COMP1: LSC */
 
-  HAL_RCC_OscConfig(&RCCCONF);                            /* 时钟初始化 */
-  HAL_RCCEx_PeriphCLKConfig(&COMPRCC);                    /* RCC扩展外设时钟初始化 */
+  HAL_RCC_OscConfig(&RCCCONF);
+  HAL_RCCEx_PeriphCLKConfig(&COMPRCC);
 }
 
 /**
-  * @brief  比较器初始化
-  * @param  无
-  * @retval 无
+  * @brief  Comparator initialization function
+  * @param  None
+  * @retval None
   */
 static void APP_CompInit(void)
 {
-  __HAL_RCC_COMP1_CLK_ENABLE();                              /* 使能COMP1时钟 */
+  __HAL_RCC_COMP1_CLK_ENABLE();                              /* Enable COMP1 clock */
 
   hcomp1.Instance = COMP1;                                   /* COMP1 */
 
-  hcomp1.Init.InputPlus = COMP_INPUT_PLUS_IO3;               /* 正端输入: PA1 */
-  hcomp1.Init.InputMinus = COMP_INPUT_MINUS_VREFINT;         /* 负端输入: VREFINT */
-  hcomp1.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;        /* 输出不反向 */
-  hcomp1.Init.Mode = COMP_POWERMODE_MEDIUMSPEED;             /* 功耗低速 */
-  hcomp1.Init.Hysteresis = COMP_HYSTERESIS_ENABLE;           /* 延迟使能 */
-  hcomp1.Init.WindowMode = COMP_WINDOWMODE_DISABLE;          /* 窗口模式关闭 */
-  hcomp1.Init.TriggerMode = COMP_TRIGGERMODE_IT_FALLING;     /* 下降沿触发 */
+  hcomp1.Init.InputPlus = COMP_INPUT_PLUS_IO3;               /* Positive input: PA1 */
+  hcomp1.Init.InputMinus = COMP_INPUT_MINUS_VREFINT;         /* Negative input: VREFINT */
+  hcomp1.Init.OutputPol = COMP_OUTPUTPOL_NONINVERTED;        /* COMP1 polarity is non-inverted */
+  hcomp1.Init.Mode = COMP_POWERMODE_MEDIUMSPEED;             /* COMP1 power mode: Medium speed */
+  hcomp1.Init.Hysteresis = COMP_HYSTERESIS_ENABLE;           /* Hysteresis function enabled */
+  hcomp1.Init.WindowMode = COMP_WINDOWMODE_DISABLE;          /* Window mode is disabled */
+  hcomp1.Init.TriggerMode = COMP_TRIGGERMODE_IT_FALLING;     /* Trigger mode: Falling edge interrupt */
   hcomp1.Init.DigitalFilter = 0;                         
   HAL_COMP_Init(&hcomp1);
 }
 
 /**
-  * @brief  比较器中断
-  * @param  无
-  * @retval 无
+  * @brief  Comparator interrupt enable function
+  * @param  None
+  * @retval None
   */
 static void APP_CompIt(void)
 {
-  /* COMP中断使能 */
+  /* Enable COMP interrupt */
   HAL_NVIC_EnableIRQ(ADC_COMP_IRQn);
   HAL_NVIC_SetPriority(ADC_COMP_IRQn, 0x01, 0);
 }
 
 /**
-  * @brief  LED翻转
-  * @param  无
-  * @retval 无
+  * @brief  LED toggle function
+  * @param  None
+  * @retval None
   */
 static void APP_LedRun(void)
 {
@@ -162,9 +171,9 @@ static void APP_LedRun(void)
 }
 
 /**
-  * @brief  比较器中断回调函数
-  * @param  无
-  * @retval 无
+  * @brief  Comparator interrupt callback function
+  * @param  None
+  * @retval None
   */
 void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp)
 {
@@ -172,13 +181,13 @@ void HAL_COMP_TriggerCallback(COMP_HandleTypeDef *hcomp)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -186,16 +195,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

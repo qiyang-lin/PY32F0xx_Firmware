@@ -33,59 +33,62 @@
 #include "main.h"
 
 /* Private define ------------------------------------------------------------*/
+#define LED_GPIO_PIN                   LED3_PIN
+#define LED_GPIO_PORT                  LED3_GPIO_PORT
+#define LED_GPIO_CLK_ENABLE()          LED3_GPIO_CLK_ENABLE()
+
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
 void APP_LED_Init(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  APP_LED_Init();                            /* LED初始化 */
+  APP_LED_Init();                                     /* Initialize LED */
   while (1)
   {
-    HAL_Delay(250);                          /* 延时250ms */
-    HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);   /* LED翻转 */
+    HAL_Delay(250);                                   /* Delay 250ms */
+    HAL_GPIO_TogglePin(LED_GPIO_PORT, LED_GPIO_PIN);  /* Toggle LED */
   }
 }
 
 /**
-  * @brief  LED配置函数
-  * @param  无
-  * @retval 无
+  * @brief  GPIO configuration
+  * @param  None
+  * @retval None
   */
 void APP_LED_Init(void)
 {
   GPIO_InitTypeDef  GPIO_InitStruct = {0};
 
-  __HAL_RCC_GPIOA_CLK_ENABLE();                          /* GPIOA时钟使能 */
+  LED_GPIO_CLK_ENABLE();                                 /* Enable GPIO clock */
 
-  /* 初始化GPIOA5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_5;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;            /* 推挽输出 */
-  GPIO_InitStruct.Pull = GPIO_NOPULL;                    /* 无上下拉 */
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;          /* GPIO速度 */
+  /* Initialize LED */
+  GPIO_InitStruct.Pin = LED_GPIO_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;            /* Push-pull output */
+  GPIO_InitStruct.Pull = GPIO_NOPULL;                    /* No pull-up or pull-down */
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;          /* GPIO speed */
 
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);                /* GPIO初始化 */
+  HAL_GPIO_Init(LED_GPIO_PORT, &GPIO_InitStruct);        /* Initialize GPIO */
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -93,16 +96,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

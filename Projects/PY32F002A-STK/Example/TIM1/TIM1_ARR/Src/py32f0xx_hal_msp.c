@@ -33,7 +33,7 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -41,13 +41,13 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
-  __HAL_RCC_TIM1_CLK_ENABLE();                            /* 使能TIM1时钟 */
+  __HAL_RCC_TIM1_CLK_ENABLE();                            /* Enable TIM1 clock */
   HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 0, 0);   /* 设置中断优先级 */
-  HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);           /* 使能TIM1中断 */
+  HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);           /* Enable TIM1 interrupt */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE****/

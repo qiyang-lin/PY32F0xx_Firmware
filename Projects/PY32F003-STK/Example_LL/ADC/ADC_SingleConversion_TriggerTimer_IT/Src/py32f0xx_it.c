@@ -94,13 +94,13 @@ void SysTick_Handler(void)
   */
 void ADC_COMP_IRQHandler(void)
 {
-  /* 检测是不是转换结束触发的中断 */
+  /* Detect if the interrupt is triggered by the end of conversion */
   if(LL_ADC_IsActiveFlag_EOC(ADC1) != 0)
   {
-    /* 清空ADC EOC 中断 */
+    /* Clear ADC EOC interrupt */
     LL_ADC_ClearFlag_EOC(ADC1);
 
-    /* 调用中断处理函数 */
+    /* Calling the interrupt handler function */
     APP_AdcGrpRegularUnitaryConvCompleteCallback();
   }
 }

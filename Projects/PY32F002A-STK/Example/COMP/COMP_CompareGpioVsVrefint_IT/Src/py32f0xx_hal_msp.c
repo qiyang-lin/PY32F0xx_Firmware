@@ -40,7 +40,7 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -49,30 +49,30 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始化COMP相关MSP
+  * @brief Initialize COMP-related MSP
   */
 void HAL_COMP_MspInit(COMP_HandleTypeDef *hcomp)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  __HAL_RCC_GPIOA_CLK_ENABLE();                 /* 使能GPIOA时钟 */
-  __HAL_RCC_COMP1_CLK_ENABLE();                 /* 使能COMP1时钟 */
-  __HAL_RCC_COMP2_CLK_ENABLE();                 /* 使能COMP2时钟 */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                 /* Enable GPIOA clock */
+  __HAL_RCC_COMP1_CLK_ENABLE();                 /* Enable COMP1 clock */
+  __HAL_RCC_COMP2_CLK_ENABLE();                 /* Enable COMP2 clock */
   
-  /* GPIO PA1配置为模拟输入 */
+  /* Configure GPIO PA1 as analog input */
   GPIO_InitStruct.Pin = GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;            /* 模拟模式 */
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;               /* 下拉 */
-  HAL_GPIO_Init(GPIOA,  &GPIO_InitStruct);            /* GPIO初始化 */
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;            /* Analog mode */
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;               /* Pull-down */
+  HAL_GPIO_Init(GPIOA,  &GPIO_InitStruct);            /* Initialize GPIO */
 
-  /* GPIO PA6配置为输出 */
+  /* Configure GPIO PA6 as output */
   GPIO_InitStruct.Pin = GPIO_PIN_6;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;             /* 输出 */
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;             /* Output mode */
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;               /* 下拉 */
-  GPIO_InitStruct.Alternate = GPIO_AF7_COMP1;         /* 复用为COMP1_OUT */
-  HAL_GPIO_Init(GPIOA,  &GPIO_InitStruct);            /* 初始化GPIO */
-  HAL_NVIC_EnableIRQ(ADC_COMP_IRQn);                  /* 使能COMP中断 */
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;               /* Pull-down */
+  GPIO_InitStruct.Alternate = GPIO_AF7_COMP1;         /* Alternate as COMP1_OUT */
+  HAL_GPIO_Init(GPIOA,  &GPIO_InitStruct);            /* Initialize GPIO */
+  HAL_NVIC_EnableIRQ(ADC_COMP_IRQn);                  /* Enable COMP interrupt */
   HAL_NVIC_SetPriority(ADC_COMP_IRQn, 1, 1);
 }
 

@@ -42,37 +42,37 @@ static DMA_HandleTypeDef  hdma_tim;
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始TIM相关MSP
+  * @brief Initialize TIM-related MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
-  __HAL_RCC_DMA_CLK_ENABLE();                                 /* DMA时钟使能 */
-  __HAL_RCC_TIM1_CLK_ENABLE();                                /* TIM1时钟使能 */
-  __HAL_RCC_SYSCFG_CLK_ENABLE();                              /* SYSCFG时钟使能 */
-  HAL_SYSCFG_DMA_Req(0x10);                                   /* DMA1_MAP 选择TIM1_UP */
+  __HAL_RCC_DMA_CLK_ENABLE();                                 /* Enable DMA clock */
+  __HAL_RCC_TIM1_CLK_ENABLE();                                /* Enable TIM1 clock */
+  __HAL_RCC_SYSCFG_CLK_ENABLE();                              /* Enable SYSCFG clock */
+  HAL_SYSCFG_DMA_Req(0x10);                                   /* DMA1_MAP selects TIM1_UP */
 
-  hdma_tim.Instance = DMA1_Channel1;                          /* 选择DMA通道1 */
-  hdma_tim.Init.Direction = DMA_MEMORY_TO_PERIPH;             /* 方向为从存储器到外设 */
-  hdma_tim.Init.PeriphInc = DMA_PINC_DISABLE;                 /* 禁止外设地址增量 */
-  hdma_tim.Init.MemInc = DMA_MINC_ENABLE;                     /* 使能存储器地址增量 */
-  hdma_tim.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD ;   /* 外设数据宽度为32位 */
-  hdma_tim.Init.MemDataAlignment = DMA_MDATAALIGN_WORD ;      /* 存储器数据宽度位32位 */
-  hdma_tim.Init.Mode = DMA_NORMAL;                            /* 禁止循环模式 */
-  hdma_tim.Init.Priority = DMA_PRIORITY_VERY_HIGH;            /* 通道优先级为很高 */
-  HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 0, 0);       /* 设置中断优先级 */
-  HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);               /* 使能TIM1中断 */
+  hdma_tim.Instance = DMA1_Channel1;                          /* Select DMA channel 1 */
+  hdma_tim.Init.Direction = DMA_MEMORY_TO_PERIPH;             /* Memory to peripheral direction */
+  hdma_tim.Init.PeriphInc = DMA_PINC_DISABLE;                 /* Disable peripheral address increment */
+  hdma_tim.Init.MemInc = DMA_MINC_ENABLE;                     /* Enable memory address increment */
+  hdma_tim.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD ;   /* Peripheral data width: 32-bit */
+  hdma_tim.Init.MemDataAlignment = DMA_MDATAALIGN_WORD ;      /* Memory data width: 32-bit */
+  hdma_tim.Init.Mode = DMA_NORMAL;                            /* Disable circular mode */
+  hdma_tim.Init.Priority = DMA_PRIORITY_VERY_HIGH;            /* Channel priority: very high */
+  HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 0, 0);       /* Set interrupt priority */
+  HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);               /* Enable TIM1 interrupt */
 
-  __HAL_LINKDMA(htim, hdma[TIM_DMA_ID_UPDATE], hdma_tim);     /* DMA1关联TIM_UP事件 */
-  HAL_DMA_Init(htim->hdma[TIM_DMA_ID_UPDATE]);                /* DMA初始化 */
+  __HAL_LINKDMA(htim, hdma[TIM_DMA_ID_UPDATE], hdma_tim);     /* Link DMA1 with TIM_UP event */
+  HAL_DMA_Init(htim->hdma[TIM_DMA_ID_UPDATE]);                /* DMA initialization */
   
-  /*启动DMA*/
+  /*Start DMA*/
   HAL_DMA_Start(htim->hdma[TIM_DMA_ID_UPDATE], (uint32_t)&Arr_DMA, (uint32_t)&TIM1->ARR, 3);
 }
 

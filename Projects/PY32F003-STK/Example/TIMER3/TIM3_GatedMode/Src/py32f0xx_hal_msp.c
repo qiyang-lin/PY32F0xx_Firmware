@@ -40,21 +40,21 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief   初始化全局MSP
+  * @brief   Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief   初始TIM相关MSP
+  * @brief   Initialize TIM-related MSP
   */
 void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
 {
   GPIO_InitTypeDef   GPIO_InitStruct;
   __HAL_RCC_TIM3_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  /*PA6初始化为TIM3_CH1*/
+  /* Initialize PA6 as TIM3_CH1 */
   GPIO_InitStruct.Pin = GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
@@ -62,8 +62,8 @@ void HAL_TIM_IC_MspInit(TIM_HandleTypeDef *htim)
   GPIO_InitStruct.Alternate = GPIO_AF1_TIM3;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0); /* 设置中断优先级 */
-  HAL_NVIC_EnableIRQ(TIM3_IRQn);         /* 使能TIM3中断 */
+  HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0); /* Set interrupt priority */
+  HAL_NVIC_EnableIRQ(TIM3_IRQn);         /* Enable TIM3 interrupt */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

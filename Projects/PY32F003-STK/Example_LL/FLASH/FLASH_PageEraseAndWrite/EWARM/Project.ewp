@@ -1086,18 +1086,6 @@
         <group>
             <name>PY32F0xx_HAL_Driver</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\..\..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_hal.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\..\..\..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_hal_cortex.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\..\..\..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_hal_flash.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\..\..\..\..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_ll_gpio.c</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\..\..\..\..\..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_ll_utils.c</name>
             </file>
         </group>

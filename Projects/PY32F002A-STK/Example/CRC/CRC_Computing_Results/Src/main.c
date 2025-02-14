@@ -42,7 +42,7 @@
 /* CRC handler declaration */
 CRC_HandleTypeDef   CrcHandle;
 
-/* 保存CRC结果 */
+/* Variable used to store the CRC checksum value */
 __IO uint32_t uwCRCValue = 0;
 
 static const uint32_t aDataBuffer[BUFFER_SIZE] =
@@ -68,50 +68,49 @@ static const uint32_t aDataBuffer[BUFFER_SIZE] =
   0xdf7caf9b, 0xbfba8fd9, 0x9ff86e17, 0x7e364e55, 0x2e933eb2, 0x0ed11ef0
 };
 
-/* 期望CRC计算得到的结果 */
+/* Expected CRC checksum value */
 uint32_t uwExpectedCRCValue = 0x379E9F06;
-void Error_Handler(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* 初始化CRC模块 */
+  /* Initialize CRC module */
   CrcHandle.Instance = CRC;
   if (HAL_CRC_Init(&CrcHandle) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  uwCRCValue = HAL_CRC_Accumulate(&CrcHandle, (uint32_t *)aDataBuffer, BUFFER_SIZE);  /* 计算aDataBuffer的CRC */
+  uwCRCValue = HAL_CRC_Accumulate(&CrcHandle, (uint32_t *)aDataBuffer, BUFFER_SIZE);  /* Calculate CRC of aDataBuffer */
 
-  if (uwCRCValue != uwExpectedCRCValue)                                               /* 比较CRC值和预期值 */
+  if (uwCRCValue != uwExpectedCRCValue)                                               /* Compare CRC value with expected value */
   {
-    BSP_LED_Off(LED_GREEN);                                                           /* 不相符，则关闭LED */
+    BSP_LED_Off(LED_GREEN);                                                           /* If not matching, turn off LED */
   }
   else
   {
-    BSP_LED_On(LED_GREEN);                                                            /* 相符，则打开LED */
+    BSP_LED_On(LED_GREEN);                                                            /* If matching, turn on LED */
   }
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -119,16 +118,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

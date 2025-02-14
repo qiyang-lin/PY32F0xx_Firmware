@@ -34,6 +34,7 @@
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 LPTIM_HandleTypeDef       LPTIMConf = {0};
+PWR_StopModeConfigTypeDef PwrStopModeConf = {0};
 
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -44,41 +45,38 @@ static void APP_LPTIMStart(void);
 static void APP_delay_us(uint32_t nus);
 
 /**
-  * @brief   应用程序入口函数
+  * @brief   Main program.
   * @retval  int
   */
 int main(void)
 {
-  /*外设、systick初始化*/
+  /*Reset of all peripherals, Initializes the Systick*/
   HAL_Init();
   
-  /* 初始化LED */
-  BSP_LED_Init(LED3);
+  /* Initialize LED */
+  BSP_LED_Init(LED_GREEN);
   
-  /* 初始化按键 */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_USER, BUTTON_MODE_GPIO);
 
-  /*时钟设置*/
+  /*Clock configuration*/
   APP_RCCOscConfig();
   
-  /*LPTIM初始化*/
+  /*LPTIM initialization*/
   APP_LPTIMInit();
 
-  /* 使能PWR */
+  /* Enable PWR clock */
   __HAL_RCC_PWR_CLK_ENABLE();
   
-  /* 关闭Systick中断 */
-  HAL_SuspendTick();
-
-  /*点亮LED*/
+  /*Turn on the LED*/
   BSP_LED_On(LED_GREEN);
   
-  /*等待按键按下*/
+  /*Wait for button press*/
   while (BSP_PB_GetState(BUTTON_USER) != 0)
   {
   }
 
-  /*关闭LED*/
+  /*Turn off the LED*/
   BSP_LED_Off(LED_GREEN);
 
   while (1)
@@ -86,58 +84,70 @@ int main(void)
     /*Disable LPTIM*/
     __HAL_LPTIM_DISABLE(&LPTIMConf);
    
-    /*使能LPTIM并开启中断*/
+    /*Enable LPTIM and interrupt*/
     APP_LPTIMStart();
     
-    /*进入STOP模式，使用中断唤醒*/
+    /* Suspend Systick interrupt */
+    HAL_SuspendTick();
+
+    /* VCORE = 1.0V  when enter stop mode */
+    PwrStopModeConf.LPVoltSelection       =  PWR_STOPMOD_LPR_VOLT_SCALE2;
+    PwrStopModeConf.FlashDelay            =  PWR_WAKEUP_FLASH_DELAY_5US;
+    PwrStopModeConf.WakeUpHsiEnableTime   =  PWR_WAKEUP_HSIEN_AFTER_MR;
+    PwrStopModeConf.RegulatorSwitchDelay  =  PWR_WAKEUP_LPR_TO_MR_DELAY_2US;
+    PwrStopModeConf.SramRetentionVolt     =  PWR_SRAM_RETENTION_VOLT_VOS;
+    HAL_PWR_ConfigStopMode(&PwrStopModeConf);
+    
+    /*Enter STOP mode with interrupt wakeup*/
     HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+    
+    /* Resume Systick interrupt */
+    HAL_ResumeTick();
   }
 }
 
 /**
-  * @brief   时钟配置函数
-  * @param   无
-  * @retval  无
+  * @brief   Clock configuration function
+  * @param   None
+  * @retval  None
   */
 static void APP_RCCOscConfig(void)
 {
-  RCC_OscInitTypeDef OSCINIT;
-  RCC_PeriphCLKInitTypeDef LPTIM_RCC;
+  RCC_OscInitTypeDef OSCINIT = {0};
+  RCC_PeriphCLKInitTypeDef LPTIM_RCC ={0};
 
-  /*LSI时钟配置*/
-  OSCINIT.OscillatorType = RCC_OSCILLATORTYPE_LSI;  /* 选择配置LSI */
-  OSCINIT.LSIState = RCC_LSI_ON;                    /* LSI开启 */
-  /*时钟初始化*/
+  /*LSI clock configuration*/
+  OSCINIT.OscillatorType = RCC_OSCILLATORTYPE_LSI;  /* Set the oscillator type to LSI */
+  OSCINIT.LSIState = RCC_LSI_ON;                    /* Enable LSI */
   if (HAL_RCC_OscConfig(&OSCINIT) != HAL_OK)
   {
     APP_ErrorHandler();
   }
   
-  /*LPTIM时钟配置*/
-  LPTIM_RCC.PeriphClockSelection = RCC_PERIPHCLK_LPTIM;     /* 选择配置外设时钟：LPTIM */
-  LPTIM_RCC.LptimClockSelection = RCC_LPTIMCLKSOURCE_LSI;   /* 选择LPTIM时钟源：LSI */
-  /*外设时钟初始化*/
+  /*Clock initialization*/
+  LPTIM_RCC.PeriphClockSelection = RCC_PERIPHCLK_LPTIM;     /* Select peripheral clock: LPTIM */
+  LPTIM_RCC.LptimClockSelection = RCC_LPTIMCLKSOURCE_LSI;   /* Select LPTIM clock source: LSI */
   if (HAL_RCCEx_PeriphCLKConfig(&LPTIM_RCC) != HAL_OK)
   {
     APP_ErrorHandler();
   }
   
-  /*使能LPTIM时钟*/
+  /*Enable LPTIM clock*/
   __HAL_RCC_LPTIM_CLK_ENABLE();
 }
 
 /**
-  * @brief   初始化LPTIM
-  * @param   无
-  * @retval  无
+  * @brief   Initialize LPTIM
+  * @param   None
+  * @retval  None
   */
 static void APP_LPTIMInit(void)
 {
-  /*LPTIM配置*/
+  /*LPTIM configuration*/
   LPTIMConf.Instance = LPTIM;                         /* LPTIM */
-  LPTIMConf.Init.Prescaler = LPTIM_PRESCALER_DIV128;  /* 128分频 */
-  LPTIMConf.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE; /* 立即更新模式 */
-  /*初始化LPTIM*/
+  LPTIMConf.Init.Prescaler = LPTIM_PRESCALER_DIV128;  /* Prescaler: 128 */
+  LPTIMConf.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE; /* Immediate update mode */
+  /*Initialize LPTIM*/
   if (HAL_LPTIM_Init(&LPTIMConf) != HAL_OK)
   {
     APP_ErrorHandler();
@@ -145,32 +155,32 @@ static void APP_LPTIMInit(void)
 }
 
 /**
-  * @brief   使能LPTIM和中断
-  * @param   无
-  * @retval  无
+  * @brief   Enable LPTIM and interrupt, and start in single count mode
+  * @param   None
+  * @retval  None
   */
 static void APP_LPTIMStart(void)
 {
-  /* 使能重载中断 */
+  /* Enable autoreload interrupt */
   __HAL_LPTIM_ENABLE_IT(&LPTIMConf, LPTIM_IT_ARRM);
 
-  /* 使能LPTIM */
+  /* Enable LPTIM */
   __HAL_LPTIM_ENABLE(&LPTIMConf);
 
-  /* 加载重载值 */
+  /* Load autoreload value */
   __HAL_LPTIM_AUTORELOAD_SET(&LPTIMConf, 51);
 
-  /* 延时120us */
+  /* Delay 120us */
   APP_delay_us(120);
   
-  /* 开启单次计数模式 */
+  /* Start single count mode */
   __HAL_LPTIM_START_SINGLE(&LPTIMConf);
 }
 
 /**
-  * @brief   LPTIM重装载中断回调函数
-  * @param   无
-  * @retval  无
+  * @brief   LPTIM autoreload match interrupt callback function
+  * @param   None
+  * @retval  None
   */
 void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim)
 {
@@ -178,9 +188,9 @@ void HAL_LPTIM_AutoReloadMatchCallback(LPTIM_HandleTypeDef *hlptim)
 }
 
 /**
-  * @brief   微秒延时函数
-  * @param   nus ：延时时间
-  * @retval  无
+  * @brief   Microsecond delay function
+  * @param   nus ：delay time in microseconds
+  * @retval  None
   */
 static void APP_delay_us(uint32_t nus)
  {
@@ -193,29 +203,29 @@ static void APP_delay_us(uint32_t nus)
  }
  
 /**
-  * @brief   错误执行函数
-  * @param   无
-  * @retval  无
+  * @brief   This function is executed in case of error occurrence.
+  * @param   None
+  * @retval  None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

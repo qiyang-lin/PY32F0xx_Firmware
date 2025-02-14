@@ -30,7 +30,7 @@ GCC Version: GNU Arm Embedded Toolchain 10.3-2021.10
 使用步骤：
 1. 编译下载程序到MCU，并运行；
 2. 观察到LED灯闪烁；
-3. 修改程序（将main函数while循环中LL_mDelay()的参数该为1100，即配置喂狗时间为1.1s）；
+3. 修改程序（将main函数while循环中LL_mDelay()的参数改为1100，即配置喂狗时间为1.1s）；
 4. 重新编译下载程序到MCU，并运行；
 5. 观察到LED灯不亮。
 

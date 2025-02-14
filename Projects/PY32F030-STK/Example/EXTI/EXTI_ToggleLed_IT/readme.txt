@@ -25,15 +25,14 @@ GCC Version: GNU Arm Embedded Toolchain 10.3-2021.10
 ================================================================================
 使用步骤：
 1. 编译下载程序到MCU，并运行；
-2. 每按一次用户按键，观察到LED翻转一次；
+2. PA12引脚上每产生一次下降沿，LED翻转就一次；
 
 Example execution steps:
 1.Compile and download the program to the MCU and run it.
-2.Press the user button once and observe the LED toggling.
+2.Toggle the LED once for every falling edge generated on the PA12 pin;
 ================================================================================
 注意事项：
-用户按键对应PA12引脚
 
 Notes:
-The user button corresponds to pin PA12.
+
 ================================================================================

@@ -33,7 +33,7 @@
 #include "main.h"
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
@@ -41,20 +41,20 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始化CRC MSP
+  * @brief Initialize CRC-related MSP
   */
 void HAL_CRC_MspInit(CRC_HandleTypeDef *hcrc)
 {
-  /* 使能CRC模块时钟 */
+  /* CRC Peripheral clock enable */
   __HAL_RCC_CRC_CLK_ENABLE();
 }
 
 /**
-  * @brief 反初始化CRC MSP
+  * @brief Deinitialize CRC-related MSP
   */
 void HAL_CRC_MspDeInit(CRC_HandleTypeDef *hcrc)
 {
-  /* 关闭CRC模块时钟 */
+  /* CRC Peripheral clock disable */
   __HAL_RCC_CRC_CLK_DISABLE();
 }
 

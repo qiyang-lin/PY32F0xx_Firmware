@@ -54,7 +54,7 @@ int main(void)
   LL_IOP_GRP1_EnableClock(LL_IOP_GRP1_PERIPH_GPIOA);
   
   /* Initialize LED */
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   
   /* Configure and enable TIM1 output comparison mode */
   APP_ConfigTIM1OutputComparison();
@@ -122,7 +122,7 @@ static void APP_ConfigTIM1OutputComparison(void)
 void APP_CCCallback(void)
 {
   /* Toggle LED */
-  BSP_LED_Toggle(LED3);
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 /**

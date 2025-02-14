@@ -35,24 +35,29 @@ The serial port will print "WAKEUP OK!".
 4.The LED will toggle at an interval of 200ms.
 ================================================================================
 注意事项：
+通过USB转TTL模块连接PC与STK板,STK板与USB转TTL模块的连线方式如下；
+@PrintfConfigStart
 STK板        USB转TTL模块
-PA02(TX) --> RX
-PA03(RX) --> TX
-GND      --> GND
-
-波特率:115200
+PA02(TX)  -->  RX
+PA03(RX)  -->  TX
+GND       -->  GND
+UART配置为波特率115200，数据位8，停止位1，校验位None
+@PrintfConfigEnd
 
 1，演示此样例功能时需要断开swd连接线并重新上电，因为默认情况下，仿真器会把
 DBGMCU_CR.DBG_STOP置位。
 2，注意关闭systick中断，防止该中断唤醒MCU。
 
 Notes:
+Connect the PC to the STK board through the USB to TTL module, and the connection
+method between the STK board and the USB to TTL module is as follows:
+@PrintfConfigStart
 STK board USB to TTL module
-PA02(TX) --> RX
-PA03(RX) --> TX
-GND --> GND
-
-Baud Rate: 115200
+PA02(TX)  -->  RX
+PA03(RX)  -->  TX
+GND       -->  GND
+UART is configured as BaudRate 115200, data bit 8, stop bit 1, and parity None.
+@PrintfConfigEnd
 
 1.When demonstrating this sample, disconnect the SWD connection and power cycle 
 the board, as the debugger will set DBGMCU_CR.DBG_STOP by default.

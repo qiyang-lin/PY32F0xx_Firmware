@@ -39,22 +39,22 @@
 static void APP_PvdConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
-  * @param  无
+  * @brief  Main program.
+  * @param  None
   * @retval int
   */
 int main(void)
 { 
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();                    
   
-  /* 初始化LED */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
   
-  /* 配置PVD */  
+  /* Configure PVD */  
   APP_PvdConfig();   
   
-  /* 使能PVD */
+  /* Enable PVD */
   HAL_PWR_EnablePVD();           
   while(1)
   {
@@ -62,40 +62,39 @@ int main(void)
 }
 
 /**
-  * @brief  配置PVD
-  * @param  无
-  * @retval 无
+  * @brief  Configure PVD
+  * @param  None
+  * @retval None
   */
 static void APP_PvdConfig(void)
 {
-  /* PWR时钟和GPIOB时钟使能 */
+  /* Enable PWR clock and GPIOB clock */
   GPIO_InitTypeDef  GPIO_InitStruct = {0};
   PWR_PVDTypeDef    sConfigPVD      = {0};
 
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   
-  /* PB7初始化 */
+  /* Initialize PB7 */
   GPIO_InitStruct.Pin = GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   
-  sConfigPVD.Mode=PWR_PVD_MODE_IT_RISING_FALLING;       /* PVD配置为上升/下降沿中断方式 */
-  sConfigPVD.PVDFilter=PWR_PVD_FILTER_NONE;             /* 滤波功能禁止 */
+  sConfigPVD.Mode=PWR_PVD_MODE_IT_RISING_FALLING;       /* PVD configured as interrupt on rising/falling edge */
+  sConfigPVD.PVDFilter=PWR_PVD_FILTER_NONE;             /* Filter functionality disabled */
   sConfigPVD.PVDLevel=PWR_PVDLEVEL_0;                  
-  sConfigPVD.PVDSource=PWR_PVD_SOURCE_PB07;             /* PVD检测为PB07 */
-  /* PVD初始化 */
+  sConfigPVD.PVDSource=PWR_PVD_SOURCE_PB07;             /* PVD detection source is PB07 */
   HAL_PWR_ConfigPVD(&sConfigPVD);  
 
   HAL_NVIC_EnableIRQ(PVD_IRQn);
-  HAL_NVIC_SetPriority(PVD_IRQn, 0, 0);     /* 配置中断优先级 */
+  HAL_NVIC_SetPriority(PVD_IRQn, 0, 0);     /* Configure interrupt priority */
 }
 
 /**
-  * @brief  PVD回调函数
-  * @param  无
-  * @retval 无
+  * @brief  PVD callback function
+  * @param  None
+  * @retval None
   */
 void HAL_PWR_PVD_Callback(void)
 {
@@ -110,13 +109,13 @@ void HAL_PWR_PVD_Callback(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -124,16 +123,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

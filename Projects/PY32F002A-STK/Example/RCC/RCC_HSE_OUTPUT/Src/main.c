@@ -38,81 +38,80 @@
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
-void APP_SystemClockConfig(void);
+static void APP_SystemClockConfig(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /*配置PA01引脚为MCO功能，输出系统时钟*/
+  /*Configure PA01 pin as MCO2 function to output the system clock*/
   HAL_RCC_MCOConfig(RCC_MCO2, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_1); 
 
-  /* 初始化按键BUTTON */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
 
-  /*等待按键按下*/
+  /*Wait for button press*/
   while(BSP_PB_GetState(BUTTON_KEY) == 1);
 
-  /* 系统时钟配置 */
+  /* System clock configuration */
   APP_SystemClockConfig(); 
   
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  System clock configuration
+  * @param  None
+  * @retval None
   */
-void APP_SystemClockConfig(void)
+static void APP_SystemClockConfig(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /* 振荡器配置 */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;/* 选择RCC振荡器为HSE,HSI,LSI */
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                                     /* 开启HSI */
-  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                                                     /* HSI不分频 */
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_8MHz;                             /* 配置HSI输出时钟为8MHz */
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;                                                     /* 开启HSE */
-  RCC_OscInitStruct.HSEFreq = RCC_HSE_16_24MHz;                                                /* HSE晶振工作频率16M~32M */
-  RCC_OscInitStruct.LSIState = RCC_LSI_OFF;                                                    /* 关闭LSI */
+  /* Oscillator Configuration */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;/* Select oscillators HSE, HSI, LSI */
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                                     /* Enable HSI */
+  RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                                                     /* HSI not divided */
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_8MHz;                             /* Configure HSI clock as 8MHz */
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;                                                     /* Enable HSE */
+  RCC_OscInitStruct.HSEFreq = RCC_HSE_16_24MHz;                                                /* HSE crystal operating frequency 16M~24M */
+  RCC_OscInitStruct.LSIState = RCC_LSI_OFF;                                                    /* Disable LSI */
 
-  /* 配置振荡器 */
+  /* Initialize RCC oscillators */
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 
-  /* 时钟源配置 */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1; /* 选择配置时钟 HCLK,SYSCLK,PCLK1 */
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE; /* 选择HSI作为系统时钟 */
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;     /* AHB时钟 1分频 */
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;      /* APB时钟 1分频 */
-  /* 配置时钟源 */
+  /* Clock Source Configuration */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1; /* RCC system clock types */
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE; /* SYSCLK source is HSI */
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;     /* AHB clock not divided */
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;      /* APB clock not divided */
+  /* Initialize RCC system clock */
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
-    Error_Handler();
+    APP_ErrorHandler();
   }
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -120,16 +119,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

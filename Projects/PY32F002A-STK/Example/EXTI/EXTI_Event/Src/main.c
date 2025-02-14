@@ -34,36 +34,34 @@
 
 /* Private define ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+PWR_StopModeConfigTypeDef PwrStopModeConf = {0};
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-void Error_Handler(void);
 void Configure_EXTI(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 初始化所有外设，Flash接口，SysTick */
+  /* Reset of all peripherals, Initializes the Systick */
   HAL_Init();
   
-  /* LED 初始化 */
+  /* Initialize LED */
   BSP_LED_Init(LED_GREEN);
 
-  /* 按键初始化 */
+  /* Initialize button */
   BSP_PB_Init(BUTTON_KEY,BUTTON_MODE_GPIO);
   
-  /* 配置外部中断 */  
+  /* Configure external interrupt */  
   Configure_EXTI();                             
   
   /* LED ON */
   BSP_LED_On(LED_GREEN);
-  
-  /* 关闭SYSTICK中断 */
-  HAL_SuspendTick();
   
   while (BSP_PB_GetState(BUTTON_KEY) == 1)
   {
@@ -71,11 +69,22 @@ int main(void)
 
   /* LED OFF */
   BSP_LED_Off(LED_GREEN);
+
+  /* Suspend SysTick interrupt */
+  HAL_SuspendTick();
+
+  /* VCORE = 1.0V  when enter stop mode */
+  PwrStopModeConf.LPVoltSelection       =  PWR_STOPMOD_LPR_VOLT_SCALE2;
+  PwrStopModeConf.FlashDelay            =  PWR_WAKEUP_FLASH_DELAY_5US;
+  PwrStopModeConf.WakeUpHsiEnableTime   =  PWR_WAKEUP_HSIEN_AFTER_MR;
+  PwrStopModeConf.RegulatorSwitchDelay  =  PWR_WAKEUP_LPR_TO_MR_DELAY_2US;
+  PwrStopModeConf.SramRetentionVolt     =  PWR_SRAM_RETENTION_VOLT_VOS;
+  HAL_PWR_ConfigStopMode(&PwrStopModeConf);
   
-  /* 进入STOP模式 */
+  /* Enter STOP mode */
   HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFE);
 
-  /* 打开SYSTICK中断 */  
+  /* Resume the SysTick interrupt */  
   HAL_ResumeTick();
   
   while (1)
@@ -86,9 +95,9 @@ int main(void)
 }
 
 /**
-  * @brief  配置事件引脚引脚
-  * @param  无
-  * @retval 无
+  * @brief  Configure event pin
+  * @param  None
+  * @retval None
   */
 void Configure_EXTI(void)
 {
@@ -104,13 +113,13 @@ void Configure_EXTI(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
-void Error_Handler(void)
+void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -118,16 +127,17 @@ void Error_Handler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* infinite loop */
   while (1)
   {
   }

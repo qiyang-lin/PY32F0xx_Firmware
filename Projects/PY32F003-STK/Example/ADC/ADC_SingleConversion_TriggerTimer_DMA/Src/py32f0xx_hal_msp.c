@@ -42,43 +42,43 @@ DMA_HandleTypeDef HdmaCh1;
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始化ADC相关MSP
+  * @brief Initialize ADC-related MSP
   */
 void HAL_ADC_MspInit(ADC_HandleTypeDef *hadc)
 {
   GPIO_InitTypeDef          GPIO_InitStruct = {0};
 
-  __HAL_RCC_SYSCFG_CLK_ENABLE();                              /* SYSCFG时钟使能 */
-  __HAL_RCC_DMA_CLK_ENABLE();                                 /* DMA时钟使能 */
-  __HAL_RCC_GPIOA_CLK_ENABLE();                               /* 使能GPIOA时钟 */
-  __HAL_RCC_ADC_CLK_ENABLE();                                 /* 使能ADC时钟 */
+  __HAL_RCC_SYSCFG_CLK_ENABLE();                              /* Enable SYSCFG clock */
+  __HAL_RCC_DMA_CLK_ENABLE();                                 /* Enable DMA clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                               /* Enable GPIOA clock */
+  __HAL_RCC_ADC_CLK_ENABLE();                                 /* Enable ADC clock */
 
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  HAL_SYSCFG_DMA_Req(0);                                      /* DMA1_MAP选择为ADC */
+  HAL_SYSCFG_DMA_Req(0);                                      /* Set DMA1 mapping to ADC */
 
-  HdmaCh1.Instance                 = DMA1_Channel1;           /* 选择DMA通道1 */
-  HdmaCh1.Init.Direction           = DMA_PERIPH_TO_MEMORY;    /* 方向为从外设到存储器 */
-  HdmaCh1.Init.PeriphInc           = DMA_PINC_DISABLE;        /* 禁止外设地址增量 */
-  HdmaCh1.Init.MemInc              = DMA_MINC_DISABLE;        /* 禁止存储器增量 */
-  HdmaCh1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;     /* 外设数据宽度为32位 */
-  HdmaCh1.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;     /* 存储器数据宽度位32位 */
-  HdmaCh1.Init.Mode                = DMA_CIRCULAR;            /* 循环模式 */
-  HdmaCh1.Init.Priority            = DMA_PRIORITY_VERY_HIGH;  /* 通道优先级为很高 */
+  HdmaCh1.Instance                 = DMA1_Channel1;           /* Select DMA channel 1 */
+  HdmaCh1.Init.Direction           = DMA_PERIPH_TO_MEMORY;    /* Direction: peripheral to memory */
+  HdmaCh1.Init.PeriphInc           = DMA_PINC_DISABLE;        /* Disable peripheral address increment */
+  HdmaCh1.Init.MemInc              = DMA_MINC_DISABLE;        /* Disable memory address increment */
+  HdmaCh1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;     /* Peripheral data width: 32-bit */
+  HdmaCh1.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;     /* Memory data width: 32-bit */
+  HdmaCh1.Init.Mode                = DMA_CIRCULAR;            /* Circular mode */
+  HdmaCh1.Init.Priority            = DMA_PRIORITY_VERY_HIGH;  /* Channel priority: very high */
 
-  HAL_DMA_DeInit(&HdmaCh1);                                   /* DMA反初始化 */
-  HAL_DMA_Init(&HdmaCh1);                                     /* 初始化DMA通道1 */
-  __HAL_LINKDMA(hadc, DMA_Handle, HdmaCh1);                   /* 连接DMA句柄 */
+  HAL_DMA_DeInit(&HdmaCh1);                                   /* Deinitialize DMA channel 1 */
+  HAL_DMA_Init(&HdmaCh1);                                     /* Initialize DMA channel 1 */
+  __HAL_LINKDMA(hadc, DMA_Handle, HdmaCh1);                   /* Link DMA handle to ADC */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

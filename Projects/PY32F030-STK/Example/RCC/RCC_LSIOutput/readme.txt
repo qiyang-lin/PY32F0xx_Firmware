@@ -6,7 +6,7 @@
 此样例使能LSI，并通过MCO（PA08）引脚输出。
 
 Function descriptions:
- This sample enables the LSI and is output via the MCO (PA08) pin. 
+This sample enables the LSI and is output via the MCO (PA08) pin. 
 ================================================================================
 测试环境：
 测试用板：PY32F030_STK

@@ -41,6 +41,7 @@ static void APP_SystemClockConfig(void);
 static void APP_ConfigLPTIMOneShot(void);
 static void APP_uDelay(uint32_t nus);
 static void APP_LPTIMClockconf(void);
+static void APP_EnterStop(void);
 
 /**
   * @brief  Main program.
@@ -56,7 +57,7 @@ int main(void)
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
   
   /* Initialize LED and button */  
-  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED_GREEN);
   BSP_PB_Init(BUTTON_USER,BUTTON_MODE_GPIO);
   
   /* Configure LPTIM clock source as LSI */
@@ -66,21 +67,20 @@ int main(void)
   APP_ConfigLPTIMOneShot();
   
   /* Turn on LED */
-  BSP_LED_On(LED3);
+  BSP_LED_On(LED_GREEN);
   
   /* Wait for button press */
   while(BSP_PB_GetState(BUTTON_USER) != 0)
   {}
   
   /* Turn off LED */
-  BSP_LED_Off(LED3);
+  BSP_LED_Off(LED_GREEN);
     
   while (1)
   {
-    /* Enable low power run mode */
-    LL_PWR_EnableLowPowerRunMode();
     /* Disable LPTIM */
     LL_LPTIM_Disable(LPTIM1);
+    
     /* Enable LPTIM */
     LL_LPTIM_Enable(LPTIM1);
     
@@ -89,13 +89,35 @@ int main(void)
 
     /* Start LPTIM in one-shot mode */
     LL_LPTIM_StartCounter(LPTIM1,LL_LPTIM_OPERATING_MODE_ONESHOT);
-
-    /* Set SLEEPDEEP bit of Cortex System Control Register */
-    LL_LPM_EnableDeepSleep();
     
-    /* Request Wait For Interrupt */
-    __WFI();
+    /* Enter stop mode */
+    APP_EnterStop();
   }
+}
+
+/**
+  * @brief  Enter STOP mode
+  * @param  None
+  * @retval None
+  */
+static void APP_EnterStop(void)
+{
+  /* Enable PWR clock */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
+  
+  /* Low power STOP voltage 1.0V */
+  LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE2);
+
+  /* Enter low power mode */
+  LL_PWR_EnableLowPowerRunMode();
+  
+  /* Set SLEEPDEEP bit of Cortex System Control Register */
+  LL_LPM_EnableDeepSleep();
+
+  /* Request Wait For Interrupt */
+  __WFI();
+  
+  LL_LPM_EnableSleep();
 }
 
 /**
@@ -152,7 +174,7 @@ static void APP_ConfigLPTIMOneShot(void)
 void APP_LPTIMCallback(void)
 {
   /*Toggle LED*/
-  BSP_LED_Toggle(LED3);
+  BSP_LED_Toggle(LED_GREEN);
 }
 
 /**

@@ -56,7 +56,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void APP_ErrorHandler(void);
 
 /* Private defines -----------------------------------------------------------*/
 

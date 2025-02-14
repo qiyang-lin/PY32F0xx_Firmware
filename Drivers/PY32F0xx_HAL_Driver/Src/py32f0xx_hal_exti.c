@@ -412,7 +412,7 @@ HAL_StatusTypeDef HAL_EXTI_RegisterCallback(EXTI_HandleTypeDef *hexti, EXTI_Call
   * @brief  Store line number as handle private field.
   * @param  hexti Exti handle.
   * @param  ExtiLine Exti line number.
-  *         This parameter can be from 0 to @ref EXTI_LINE_NB.
+  *         This parameter can be a value of @ref EXTI_Line.
   * @retval HAL Status.
   */
 HAL_StatusTypeDef HAL_EXTI_GetHandle(EXTI_HandleTypeDef *hexti, uint32_t ExtiLine)

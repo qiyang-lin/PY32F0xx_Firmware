@@ -94,12 +94,12 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f002xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 /**
-  * @brief  中断入口函数，每产生一次下降沿,LED翻转一次
-  * @param  无
-  * @retval 无
+  * @brief  Interrupt entry function, every time a falling edge is generated, the LED is flipped once.
+  * @param  None
+  * @retval None
   */
 void EXTI2_3_IRQHandler(void)
 {

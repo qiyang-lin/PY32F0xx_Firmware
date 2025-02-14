@@ -47,29 +47,29 @@ void HAL_MspInit(void)
 }
 
 /**
-  * @brief 初始TIM相关MSP
+  * @brief Initialize TIM-related MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
   GPIO_InitTypeDef   GPIO_InitStruct = {0};
-  __HAL_RCC_TIM1_CLK_ENABLE();                    /* TIM1时钟使能 */
-  __HAL_RCC_GPIOA_CLK_ENABLE();                   /* GPIOA时钟使能 */
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;         /* 复用功能 */
-  GPIO_InitStruct.Pull = GPIO_PULLUP;             /* 上拉 */
+  __HAL_RCC_TIM1_CLK_ENABLE();                    /* Enable TIM1 clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();                   /* Enable GPIOA clock */
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;         /* Alternate function mode */
+  GPIO_InitStruct.Pull = GPIO_PULLUP;             /* Pull-up */
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  /*GPIOA3初始化 TIM1_CH1*/
+  /* GPIOA3 initialised to TIM1_CH1 */
   GPIO_InitStruct.Pin = GPIO_PIN_3;
   GPIO_InitStruct.Alternate = GPIO_AF13_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /*GPIOA13初始化 TIM1_CH2*/
+  /* GPIOA13 initialised to TIM1_CH2 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Alternate = GPIO_AF13_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /*GPIOA0初始化  TIM1_CH3*/
+  /* GPIOA0 initialised to TIM1_CH3 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Alternate = GPIO_AF13_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /*GPIOA1初始化 TIM1_CH4*/
+  /* GPIOA1 initialised to TIM1_CH4 */
   GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Alternate = GPIO_AF13_TIM1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);

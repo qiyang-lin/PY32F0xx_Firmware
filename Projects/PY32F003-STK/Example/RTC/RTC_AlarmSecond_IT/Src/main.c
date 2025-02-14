@@ -43,30 +43,30 @@ static void APP_RtcAlarmConfig(void);
 static void APP_RtcTimeShow(void);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
 {
-  /* 复位所有外设，初始化flash接口和systick.*/
+  /* Reset of all peripherals, Initializes the Systick*/
   HAL_Init();
   
-  /* 系统时钟配置 */
+  /* System clock configuration */
   APP_SystemClockConfig();
   
-  /* UART初始化 */
+  /* USART initialization */
   DEBUG_USART_Config();
   
-  /* RTC初始化 */
-  RtcHandle.Instance = RTC;                        /* 选择RTC */
-  RtcHandle.Init.AsynchPrediv = RTC_AUTO_1_SECOND; /* RTC一秒时基自动计算 */
-  RtcHandle.Init.OutPut = RTC_OUTPUTSOURCE_NONE;   /* TAMPER引脚无输出 */
+  /* RTC initialization */
+  RtcHandle.Instance = RTC;                        /* Select RTC */
+  RtcHandle.Init.AsynchPrediv = RTC_AUTO_1_SECOND; /* RTC asynchronous prescaler calculated automatically for one second time base */
+  RtcHandle.Init.OutPut = RTC_OUTPUTSOURCE_NONE;   /* No output on the TAMPER pin */
   if (HAL_RTC_Init(&RtcHandle) != HAL_OK)
   {
     APP_ErrorHandler();
   }
   
-  /* RTC时钟配置 */
+  /* RTC clock configuration */
   APP_RtcAlarmConfig();
   
   while (1)
@@ -75,20 +75,20 @@ int main(void)
 }
 
 /**
-  * @brief  秒中断回调函数
-  * @param  hrtc：RTC句柄
-  * @retval 无
+  * @brief  Second interrupt callback function
+  * @param  hrtc：RTC handle
+  * @retval None
   */
 void HAL_RTCEx_RTCEventCallback(RTC_HandleTypeDef *hrtc)
 {
-  printf("RTC_IT_SEC\r\n");
   APP_RtcTimeShow();
+  printf("RTC_IT_SEC\r\n");
 }
 
 /**
-  * @brief  闹钟中断回调函数
-  * @param  hrtc：RTC句柄
-  * @retval 无
+  * @brief  Alarm interrupt callback function
+  * @param  hrtc：RTC handle
+  * @retval None
   */
 void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 {
@@ -96,9 +96,9 @@ void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *hrtc)
 }
 
 /**
-  * @brief  RTC闹钟配置
-  * @param  无
-  * @retval 无
+  * @brief  RTC alarm configuration
+  * @param  None
+  * @retval None
   */
 static void APP_RtcAlarmConfig(void)
 {
@@ -106,7 +106,7 @@ static void APP_RtcAlarmConfig(void)
   RTC_TimeTypeDef  stimestructure = {0};
   RTC_AlarmTypeDef salarmstructure = {0};
 
-  /* 设置日期: 2021/5/21 星期五 */
+  /* Set date: 2021/5/21, Friday */
   sdatestructure.Year = 0x21;
   sdatestructure.Month = 0x05;
   sdatestructure.Date = 0x21;
@@ -116,7 +116,7 @@ static void APP_RtcAlarmConfig(void)
     APP_ErrorHandler();
   }
   
-  /* 设置时间: 12:13:00 */
+  /* Set time: 12:13:00 */
   stimestructure.Hours = 0x12;
   stimestructure.Minutes = 0x13;
   stimestructure.Seconds = 0x00;
@@ -125,7 +125,7 @@ static void APP_RtcAlarmConfig(void)
     APP_ErrorHandler();
   }
   
-  /*设置RTC闹钟，时间到12:13:35产生中断*/
+  /*Set RTC alarm, generate interrupt when the time reaches 12:13:35*/
   salarmstructure.AlarmTime.Hours = 0x12;
   salarmstructure.AlarmTime.Minutes = 0x13;
   salarmstructure.AlarmTime.Seconds = 0x35;
@@ -136,29 +136,29 @@ static void APP_RtcAlarmConfig(void)
 }
 
 /**
-  * @brief  显示RTC当前时间
-  * @param  无
-  * @retval 无
+  * @brief  Show the current RTC time
+  * @param  None
+  * @retval None
   */
 static void APP_RtcTimeShow(void)
 {
   RTC_DateTypeDef sdatestructureget = {0};
   RTC_TimeTypeDef stimestructureget = {0};
   
-  /* 获取RTC当前时间*/
+  /* Get the current RTC time*/
   HAL_RTC_GetTime(&RtcHandle, &stimestructureget, RTC_FORMAT_BIN);
   
-  /* 获取RTC当前日期 */
+  /* Get the current RTC date */
   HAL_RTC_GetDate(&RtcHandle, &sdatestructureget, RTC_FORMAT_BIN);
   
-  /* 显示时间格式为 : hh:mm:ss */
+  /* Display the time in the format: hh:mm:ss */
   printf("%02d:%02d:%02d\r\n", stimestructureget.Hours, stimestructureget.Minutes, stimestructureget.Seconds);
 }
 
 /**
-  * @brief  系统时钟配置函数
-  * @param  无
-  * @retval 无
+  * @brief  Configure system clock
+  * @param  None
+  * @retval None
   */
 static void APP_SystemClockConfig(void)
 {
@@ -193,13 +193,13 @@ static void APP_SystemClockConfig(void)
 }
 
 /**
-  * @brief  错误执行函数
-  * @param  无
-  * @retval 无
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
@@ -207,16 +207,16 @@ void APP_ErrorHandler(void)
 
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

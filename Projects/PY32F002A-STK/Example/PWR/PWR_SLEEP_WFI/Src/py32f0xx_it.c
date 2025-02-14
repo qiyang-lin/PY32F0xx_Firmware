@@ -94,7 +94,7 @@ void SysTick_Handler(void)
 /* PY32F0xx Peripheral Interrupt Handlers                                     */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
 /* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_py32f002xx.s).                   */
+/* please refer to the startup file.                                          */
 /******************************************************************************/
 
 /**
@@ -104,7 +104,7 @@ void SysTick_Handler(void)
   */
 void EXTI4_15_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);/* 处理EXTI中断请求 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_6);/* Handling EXTI Interrupt Requests */
   BSP_LED_Toggle(LED_GREEN);
 }
 

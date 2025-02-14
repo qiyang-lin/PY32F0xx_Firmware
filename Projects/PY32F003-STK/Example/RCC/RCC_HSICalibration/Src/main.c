@@ -46,7 +46,7 @@ static void APP_HSI_Calibration(void);
 static void APP_SystemClockConfig(uint32_t HSICLKSource_set);
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  Main program.
   * @retval int
   */
 int main(void)
@@ -68,7 +68,7 @@ int main(void)
   /* Turn on the LED */
   BSP_LED_On(LED_GREEN);
   
-  /* 配置系统时钟为 HSI 24MHz. */
+  /* Configure system clock为 HSI 24MHz. */
   APP_SystemClockConfig(RCC_HSICALIBRATION_24MHz);
   
   /* Calibrate the HSI */
@@ -84,8 +84,8 @@ int main(void)
 
 /**
   * @brief   TIM捕获中断执行函数
-  * @param   无
-  * @retval  无
+  * @param   None
+  * @retval  None
   */
 static void APP_HSI_Calibration(void)
 {
@@ -101,8 +101,8 @@ static void APP_HSI_Calibration(void)
 
 /**
   * @brief   TIM捕获中断执行函数
-  * @param   无
-  * @retval  无
+  * @param   None
+  * @retval  None
   */
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
@@ -141,8 +141,8 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 /**
   * @brief   TIM周期中断执行函数
-  * @param   无
-  * @retval  无
+  * @param   None
+  * @retval  None
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -150,14 +150,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
-  * @brief   配置系统时钟
+  * @brief   Configure system clock
   * @param   HSICLKSource_SET：选择HSI时钟频率
   *            @arg @ref RCC_HSICALIBRATION_4MHz：4M时钟
   *            @arg @ref RCC_HSICALIBRATION_8MHz：8M时钟
   *            @arg @ref RCC_HSICALIBRATION_16MHz：16M时钟
   *            @arg @ref RCC_HSICALIBRATION_22p12MHz：22.12M时钟
   *            @arg @ref RCC_HSICALIBRATION_24MHz：24M时钟
-  * @retval  无
+  * @retval  None
   */
 static void APP_SystemClockConfig(uint32_t HSICLKSource_SET)
 {
@@ -166,8 +166,8 @@ static void APP_SystemClockConfig(uint32_t HSICLKSource_SET)
 
   /*配置HSI时钟*/
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                     /* 使能HSI */
-  RCC_OscInitStruct.HSIDiv =    RCC_HSI_DIV1;                                  /* HSI预分频 */
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                     /* Enable HSI */
+  RCC_OscInitStruct.HSIDiv =    RCC_HSI_DIV1;                                  /* HSI prescaler */
   RCC_OscInitStruct.HSICalibrationValue = HSICLKSource_SET;                    /* 设置HSI输出时钟库会设置校准值 */
                                                                                
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)                         /* 配置时钟 */
@@ -175,13 +175,13 @@ static void APP_SystemClockConfig(uint32_t HSICLKSource_SET)
     APP_ErrorHandler();
   }
 
-  /*初始化AHB,APB总线时钟*/
+  /*Initialize AHB, and APB bus clocks*/
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                        /* 配置AHB时钟源 */
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                            /* 设置AHB预分频 */
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                             /* 设置APB1预分频 */
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;                        /* SYSCLK source is HSI */
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;                            /* Setting the AHB prescaler */
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                             /* Setting the APB1 prescaler */
                                                                                 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)       /* 配置总线 */
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     APP_ErrorHandler();
   }
@@ -189,8 +189,8 @@ static void APP_SystemClockConfig(uint32_t HSICLKSource_SET)
 
 /**
   * @brief   配置GPIO，GPIO作为TIM1捕获输入模式
-  * @param   无
-  * @retval  无
+  * @param   None
+  * @retval  None
   */
 void APP_GPIO_ConfigForCalibration(void)
 {
@@ -208,29 +208,29 @@ void APP_GPIO_ConfigForCalibration(void)
 }
 
 /**
-  * @brief   错误执行函数
-  * @param   无
-  * @retval  无
+  * @brief   This function is executed in case of error occurrence.
+  * @param   None
+  * @retval  None
   */
 void APP_ErrorHandler(void)
 {
-  /* 无限循环 */
+  /* infinite loop */
   while (1)
   {
   }
 }
 #ifdef  USE_FULL_ASSERT
 /**
-  * @brief  输出产生断言错误的源文件名及行号
-  * @param  file：源文件名指针
-  * @param  line：发生断言错误的行号
-  * @retval 无
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-  /* 用户可以根据需要添加自己的打印信息,
-     例如: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  /* 无限循环 */
+  /* User can add his own implementation to report the file name and line number,
+     for example: printf("Wrong parameters value: file %s on line %d\r\n", file, line)  */
+  /* infinite loop */
   while (1)
   {
   }

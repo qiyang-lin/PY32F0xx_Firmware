@@ -40,20 +40,20 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief   初始化全局MSP
+  * @brief   Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief   初始TIM相关MSP
+  * @brief   Initialize TIM-related MSP
   */
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
-  __HAL_RCC_TIM3_CLK_ENABLE();                          /* 使能TIM3时钟 */
-  HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);                /* 设置中断优先级 */
-  HAL_NVIC_EnableIRQ(TIM3_IRQn);                        /* 使能TIM3中断 */
+  __HAL_RCC_TIM3_CLK_ENABLE();                          /* Enable TIM3 clock */
+  HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);                /* Set interrupt priority */
+  HAL_NVIC_EnableIRQ(TIM3_IRQn);                        /* Enable TIM3 interrupt */
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

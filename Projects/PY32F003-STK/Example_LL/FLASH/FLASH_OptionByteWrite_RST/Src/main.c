@@ -33,15 +33,14 @@
 #include "py32f003xx_ll_Start_Kit.h"
 
 /* Private define ------------------------------------------------------------*/
-#define RSTPIN_MODE_GPIO
-/* #define RSTPIN_MODE_RST */
+/* #define OB_GPIO_PIN_MODE LL_FLASH_NRST_MODE_RESET */
+#define OB_GPIO_PIN_MODE LL_FLASH_NRST_MODE_GPIO
 
 /* Private variables ---------------------------------------------------------*/
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 static void APP_SystemClockConfig(void);
-static void APP_FlashOBProgram(void);
 
 /**
   * @brief  应用程序入口函数.
@@ -49,11 +48,12 @@ static void APP_FlashOBProgram(void);
   */
 int main(void)
 {
-  /* 初始化systick */
-  HAL_Init();
-
   /* 时钟初始化,配置系统时钟为HSI */
   APP_SystemClockConfig();
+
+  /* Enable SYSCFG and PWR clocks */
+  LL_APB1_GRP2_EnableClock(LL_APB1_GRP2_PERIPH_SYSCFG);
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
   /* 初始化LED */  
   BSP_LED_Init(LED_GREEN);
@@ -67,29 +67,42 @@ int main(void)
   }
 
   /* 判断RST管脚 */
-#if defined(RSTPIN_MODE_GPIO)
-  if( READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE) == OB_RESET_MODE_RESET)
-#else
-  if( READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE) == OB_RESET_MODE_GPIO)
-#endif
+
+  if(LL_FLASH_GetNrstMode(FLASH) != OB_GPIO_PIN_MODE)
   {
-    /* 写OPTION */
-    APP_FlashOBProgram();
+    /* 解锁 Flash */
+    LL_FLASH_Unlock(FLASH);
+  
+    /* 解锁 Option */
+    LL_FLASH_OBUnlock(FLASH);
+
+    LL_FLASH_TIMMING_SEQUENCE_CONFIG_24M();
+
+    /* 设置PF2为普通GPIO模式 */
+    LL_FLASH_SetOPTR(FLASH,LL_FLASH_BOR_DISABLE,LL_FLASH_BOR_LEV0,LL_FLASH_NBOOT1_CLR,LL_FLASH_IWDG_MODE_SW, \
+                           LL_FLASH_WWDG_MODE_SW, OB_GPIO_PIN_MODE,LL_FLASH_RDP_LEVEL_0);
+
+    LL_FLASH_EnableOptionProgramStart(FLASH);
+    LL_FLASH_TriggerOptionProgramStart(FLASH);
+    
+    while(LL_FLASH_IsActiveFlag_BUSY(FLASH)==1);
+    
+    /* 锁定 Option */
+    LL_FLASH_OBLock(FLASH);
+    
+    /* 锁定 Flash */
+    LL_FLASH_Lock(FLASH);
+
+    /* 产生一个复位，option byte装载  */
+    LL_FLASH_Launch(FLASH);
+  }
+  else
+  {
+    BSP_LED_On(LED_GREEN);
   }
 
   while (1)
   {
-#if defined(RSTPIN_MODE_GPIO)
-    if(READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE)== OB_RESET_MODE_GPIO )
-#else
-    if(READ_BIT(FLASH->OPTR, FLASH_OPTR_NRST_MODE)== OB_RESET_MODE_RESET )
-#endif
-    {
-      BSP_LED_On(LED_GREEN);
-      while(1)
-      {
-      }
-    }
   }
 }
 
@@ -100,9 +113,12 @@ int main(void)
   */
 static void APP_SystemClockConfig(void)
 {
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
+
   /* HSI使能及初始化 */
-  LL_RCC_HSI_Enable();
   LL_RCC_HSI_SetCalibFreq(LL_RCC_HSICALIBRATION_24MHz);
+  LL_RCC_HSI_Enable();
+
   while (LL_RCC_HSI_IsReady() != 1)
   {
   }
@@ -116,46 +132,12 @@ static void APP_SystemClockConfig(void)
   {
   }
 
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-
   /*设置APB1分频及初始化*/
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
+  LL_Init1msTick(24000000);
+  
   /* 更新系统时钟全局变量SystemCoreClock(也可以通过调用SystemCoreClockUpdate函数更新) */
   LL_SetSystemCoreClock(24000000);
-}
-
-/**
-  * @brief  写OPTION
-  * @param  无
-  * @retval 无
-  */
-static void APP_FlashOBProgram(void)
-{
-  FLASH_OBProgramInitTypeDef OBInitCfg = {0};
-
-  HAL_FLASH_Unlock();      /* 解锁FLASH */
-  HAL_FLASH_OB_Unlock();   /* 解锁OPTION */
-
-  /* 配置OPTION选项*/
-  OBInitCfg.OptionType = OPTIONBYTE_USER;
-  OBInitCfg.USERType = OB_USER_BOR_EN | OB_USER_BOR_LEV | OB_USER_IWDG_SW | OB_USER_WWDG_SW | OB_USER_NRST_MODE | OB_USER_nBOOT1;
-
-#if defined(RSTPIN_MODE_GPIO)
-  /* BOR不使能/BOR上升3.2,下降3.1/软件模式看门狗/GPIO功能/System memory作为启动区 */
-  OBInitCfg.USERConfig = OB_BOR_DISABLE | OB_BOR_LEVEL_3p1_3p2 | OB_IWDG_SW | OB_WWDG_SW | OB_RESET_MODE_GPIO | OB_BOOT1_SYSTEM;
-#else
-  /* BOR不使能/BOR上升3.2,下降3.1/软件模式看门狗/RST功能/System memory作为启动区 */
-  OBInitCfg.USERConfig = OB_BOR_DISABLE | OB_BOR_LEVEL_3p1_3p2 | OB_IWDG_SW | OB_WWDG_SW | OB_RESET_MODE_RESET | OB_BOOT1_SYSTEM;
-#endif
-
-  /* 启动option byte编程 */
-  HAL_FLASH_OBProgram(&OBInitCfg);
-
-  HAL_FLASH_Lock();     /* 锁定FLASH */
-  HAL_FLASH_OB_Lock();  /* 锁定OPTION */
-
-  /* 产生一个复位，option byte装载 */
-  HAL_FLASH_OB_Launch();
 }
 
 /**

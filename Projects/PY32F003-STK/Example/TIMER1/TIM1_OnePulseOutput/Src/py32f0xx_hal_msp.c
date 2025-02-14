@@ -40,19 +40,19 @@
 /* External functions --------------------------------------------------------*/
 
 /**
-  * @brief 初始化全局MSP
+  * @brief Initialize global MSP
   */
 void HAL_MspInit(void)
 {
 }
 
 /**
-  * @brief 初始TIM相关MSP
+  * @brief Initialize TIM-related MSP
   */
 void HAL_TIM_OnePulse_MspInit(TIM_HandleTypeDef *htim)
 {
   GPIO_InitTypeDef   GPIO_InitStruct = {0};
-  __HAL_RCC_TIM1_CLK_ENABLE();            /* 使能TIM1时钟 */
+  __HAL_RCC_TIM1_CLK_ENABLE();            /* Enable TIM1 clock */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
