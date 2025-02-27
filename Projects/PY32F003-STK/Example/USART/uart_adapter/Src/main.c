@@ -43,11 +43,20 @@ typedef enum {
 	UART_STATE_ERROR
 } uart_state_t;
 
+typedef struct {
+	uart_state_t state;
+	uint8_t rx_cnt;
+	uint8_t *rx_buf;
+	UART_HandleTypeDef *handle;
+} uart_ctx_t;
+
 /* Private variables ---------------------------------------------------------*/
-UART_HandleTypeDef UartHandle;
-uint8_t aRxBuffer[RX_BUF_SIZE];
-uint8_t m_rx_cnt;
-uart_state_t m_uart_state;
+UART_HandleTypeDef uart_upper_handle;  /* Used for communication with PC */
+UART_HandleTypeDef uart_module_handle; /* Used for communication with Airtouch module */
+static uint8_t uart_upper_rx_buf[RX_BUF_SIZE];
+static uint8_t uart_module_rx_buf[RX_BUF_SIZE];
+static uart_ctx_t uart_upper;
+static uart_ctx_t uart_module;
 
 /* Private user code ---------------------------------------------------------*/
 
@@ -57,6 +66,7 @@ uart_state_t m_uart_state;
 
 static void APP_SystemClockConfig(void);
 static void APP_IntPinConfig(void);
+static void APP_UartInit(void);
 
 /**
  * @brief  应用程序入口函数.
@@ -72,32 +82,22 @@ int main(void)
 
 	APP_IntPinConfig();
 
-	/* USART初始化 */
-	UartHandle.Instance = USART1;
-	UartHandle.Init.BaudRate = 921600;
-	UartHandle.Init.WordLength = UART_WORDLENGTH_8B;
-	UartHandle.Init.StopBits = UART_STOPBITS_1;
-	UartHandle.Init.Parity = UART_PARITY_NONE;
-	UartHandle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	UartHandle.Init.Mode = UART_MODE_TX_RX;
-	UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
-	UartHandle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-	if (HAL_UART_Init(&UartHandle) != HAL_OK) {
-		APP_ErrorHandler();
-	}
-
-	LL_USART_EnableIT_RXNE(USART1);
-	LL_USART_EnableIT_IDLE(USART1);
+	APP_UartInit();
 
 	for (;;) {
-		if (m_uart_state == UART_STATE_RX_COMPLETE) {
+		if (uart_upper.state == UART_STATE_RX_COMPLETE) {
 			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_SET);
 			HAL_Delay(5U);
-			(void)HAL_UART_Transmit(&UartHandle, (uint8_t *)aRxBuffer, m_rx_cnt, 0xFFFFU);
+			(void)HAL_UART_Transmit(uart_module.handle, uart_upper.rx_buf, uart_upper.rx_cnt, 0xFFFFU);
 			HAL_Delay(5U);
 			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_RESET);
-			m_rx_cnt = 0;
-			m_uart_state = UART_STATE_IDLE;
+			uart_upper.rx_cnt = 0;
+			uart_upper.state = UART_STATE_IDLE;
+		}
+		if (uart_module.state == UART_STATE_RX_COMPLETE) {
+			(void)HAL_UART_Transmit(uart_upper.handle, uart_module.rx_buf, uart_module.rx_cnt, 0xFFFFU);
+			uart_module.rx_cnt = 0;
+			uart_module.state = UART_STATE_IDLE;
 		}
 	}
 }
@@ -165,21 +165,88 @@ static void APP_IntPinConfig(void)
 	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_RESET);
 }
 
+static void uart_upper_init(void)
+{
+	uart_upper.handle = &uart_upper_handle;
+	uart_upper.rx_buf = uart_upper_rx_buf;
+	uart_upper.state = UART_STATE_IDLE;
+	uart_upper.rx_cnt = 0;
+
+	uart_upper_handle.Instance = USART1;
+	uart_upper_handle.Init.BaudRate = 921600;
+	uart_upper_handle.Init.WordLength = UART_WORDLENGTH_8B;
+	uart_upper_handle.Init.StopBits = UART_STOPBITS_1;
+	uart_upper_handle.Init.Parity = UART_PARITY_NONE;
+	uart_upper_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	uart_upper_handle.Init.Mode = UART_MODE_TX_RX;
+	uart_upper_handle.Init.OverSampling = UART_OVERSAMPLING_16;
+	uart_upper_handle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+	if (HAL_UART_Init(&uart_upper_handle) != HAL_OK) {
+		APP_ErrorHandler();
+	}
+
+	LL_USART_EnableIT_RXNE(USART1);
+	LL_USART_EnableIT_IDLE(USART1);
+}
+
+static void uart_module_init(void)
+{
+	uart_module.handle = &uart_module_handle;
+	uart_module.rx_buf = uart_module_rx_buf;
+	uart_module.state = UART_STATE_IDLE;
+	uart_module.rx_cnt = 0;
+
+	uart_module_handle.Instance = USART2;
+	uart_module_handle.Init.BaudRate = 921600;
+	uart_module_handle.Init.WordLength = UART_WORDLENGTH_8B;
+	uart_module_handle.Init.StopBits = UART_STOPBITS_1;
+	uart_module_handle.Init.Parity = UART_PARITY_NONE;
+	uart_module_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	uart_module_handle.Init.Mode = UART_MODE_TX_RX;
+	uart_module_handle.Init.OverSampling = UART_OVERSAMPLING_16;
+	uart_module_handle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+	if (HAL_UART_Init(&uart_module_handle) != HAL_OK) {
+		APP_ErrorHandler();
+	}
+
+	LL_USART_EnableIT_RXNE(USART2);
+	LL_USART_EnableIT_IDLE(USART2);
+}
+
+static void APP_UartInit(void)
+{
+	uart_upper_init();
+	uart_module_init();
+}
+
 /**
  * @brief  USART中断处理函数
  * @param  USARTx：USART模块，可以是USART1、USART2
  * @retval 无
  */
-void APP_UsartIRQCallback(USART_TypeDef *USARTx)
+void APP_Usart1IRQCallback(USART_TypeDef *USARTx)
 {
 	if ((LL_USART_IsActiveFlag_RXNE(USARTx) != RESET) && (LL_USART_IsEnabledIT_RXNE(USARTx) != RESET)) {
-		aRxBuffer[m_rx_cnt] = LL_USART_ReceiveData8(USARTx);
-		m_rx_cnt++;
-		m_uart_state = UART_STATE_BUSY_RX;
+		uart_upper_rx_buf[uart_upper.rx_cnt] = LL_USART_ReceiveData8(USARTx);
+		uart_upper.rx_cnt++;
+		uart_upper.state = UART_STATE_BUSY_RX;
 	}
 	if ((LL_USART_IsActiveFlag_IDLE(USARTx) != RESET) && (LL_USART_IsEnabledIT_IDLE(USARTx) != RESET)) {
 		LL_USART_ClearFlag_IDLE(USARTx);
-		m_uart_state = UART_STATE_RX_COMPLETE;
+		uart_upper.state = UART_STATE_RX_COMPLETE;
+	}
+}
+
+void APP_Usart2IRQCallback(USART_TypeDef *USARTx)
+{
+	if ((LL_USART_IsActiveFlag_RXNE(USARTx) != RESET) && (LL_USART_IsEnabledIT_RXNE(USARTx) != RESET)) {
+		uart_module.rx_buf[uart_module.rx_cnt] = LL_USART_ReceiveData8(USARTx);
+		uart_module.rx_cnt++;
+		uart_module.state = UART_STATE_BUSY_RX;
+	}
+	if ((LL_USART_IsActiveFlag_IDLE(USARTx) != RESET) && (LL_USART_IsEnabledIT_IDLE(USARTx) != RESET)) {
+		LL_USART_ClearFlag_IDLE(USARTx);
+		uart_module.state = UART_STATE_RX_COMPLETE;
 	}
 }
 

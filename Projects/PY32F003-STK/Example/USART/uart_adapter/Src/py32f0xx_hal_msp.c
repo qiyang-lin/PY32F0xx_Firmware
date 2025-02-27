@@ -53,39 +53,44 @@ void HAL_MspInit(void)
   */
 void HAL_UART_MspInit(UART_HandleTypeDef *huart)
 {
-  /* 使能时钟 */
-  __HAL_RCC_USART2_CLK_ENABLE();
-  __HAL_RCC_USART1_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  /**USART2引脚配置
-   PA0     ------> USART2_TX
-   PA1     ------> USART2_RX
-   */
-  GPIO_InitTypeDef  GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF9_USART2;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /* 使能NVIC */
-  HAL_NVIC_SetPriority(USART2_IRQn, 0, 1);
-  HAL_NVIC_EnableIRQ(USART2_IRQn);
+	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-  /**USART1引脚配置
-   PA2     ------> USART1_TX
-   PA3     ------> USART1_RX
-   */
-  GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  /* 使能NVIC */
-  HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
-  HAL_NVIC_EnableIRQ(USART1_IRQn);
+	if (huart->Instance == USART2) {
+		__HAL_RCC_USART2_CLK_ENABLE();
+
+		/**USART2引脚配置
+		 PA0     ------> USART2_TX
+		 PA1     ------> USART2_RX
+		 */
+		GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_PULLUP;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStruct.Alternate = GPIO_AF9_USART2;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		/* 使能NVIC */
+		HAL_NVIC_SetPriority(USART2_IRQn, 0, 1);
+		HAL_NVIC_EnableIRQ(USART2_IRQn);
+
+	} else if (huart->Instance == USART1) {
+		__HAL_RCC_USART1_CLK_ENABLE();
+
+		/**USART1引脚配置
+		 PA2     ------> USART1_TX
+		 PA3     ------> USART1_RX
+		 */
+		GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
+		GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+		GPIO_InitStruct.Pull = GPIO_PULLUP;
+		GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+		GPIO_InitStruct.Alternate = GPIO_AF1_USART1;
+		HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+		/* 使能NVIC */
+		HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
+		HAL_NVIC_EnableIRQ(USART1_IRQn);
+	}
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

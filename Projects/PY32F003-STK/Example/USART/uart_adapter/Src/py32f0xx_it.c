@@ -94,14 +94,14 @@ void SysTick_Handler(void)
   */
 void USART1_IRQHandler(void)
 {
-	APP_UsartIRQCallback(USART1);
+	APP_Usart1IRQCallback(USART1);
 }
 /**
   * @brief This function handles USART2 interrupt.
   */
 void USART2_IRQHandler(void)
 {
-  APP_UsartIRQCallback(USART2);
+	APP_Usart2IRQCallback(USART2);
 }
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

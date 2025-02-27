@@ -49,7 +49,8 @@ extern UART_HandleTypeDef UartHandle;
 
 /* Exported functions prototypes ---------------------------------------------*/
 void APP_ErrorHandler(void);
-void APP_UsartIRQCallback(USART_TypeDef *USARTx);
+void APP_Usart1IRQCallback(USART_TypeDef *USARTx);
+void APP_Usart2IRQCallback(USART_TypeDef *USARTx);
 
 #ifdef __cplusplus
 }
