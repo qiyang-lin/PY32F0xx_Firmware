@@ -66,6 +66,8 @@ static uart_ctx_t uart_module;
 
 static void APP_SystemClockConfig(void);
 static void APP_IntPinConfig(void);
+static void APP_RadarOutPinConfig(void);
+static void APP_WakeupPinConfig(void);
 static void APP_UartInit(void);
 
 /**
@@ -81,6 +83,8 @@ int main(void)
 	APP_SystemClockConfig();
 
 	APP_IntPinConfig();
+	APP_RadarOutPinConfig();
+	APP_WakeupPinConfig();
 
 	APP_UartInit();
 
@@ -163,6 +167,34 @@ static void APP_IntPinConfig(void)
 
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_RESET);
+}
+
+static void APP_RadarOutPinConfig(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+static void APP_WakeupPinConfig(void)
+{
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	__HAL_RCC_GPIOF_CLK_ENABLE();
+
+	GPIO_InitStruct.Pin = GPIO_PIN_0;
+	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+
+	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 }
 
 static void uart_upper_init(void)
