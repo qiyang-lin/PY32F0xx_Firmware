@@ -30,6 +30,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "target_config.h"
 
 /* Private define ------------------------------------------------------------*/
 
@@ -55,8 +56,8 @@ UART_HandleTypeDef uart_upper_handle;  /* Used for communication with PC */
 UART_HandleTypeDef uart_module_handle; /* Used for communication with Airtouch module */
 static uint8_t uart_upper_rx_buf[RX_BUF_SIZE];
 static uint8_t uart_module_rx_buf[RX_BUF_SIZE];
-static uart_ctx_t uart_upper;
-static uart_ctx_t uart_module;
+static volatile uart_ctx_t uart_upper;
+static volatile uart_ctx_t uart_module;
 
 /* Private user code ---------------------------------------------------------*/
 
@@ -90,11 +91,11 @@ int main(void)
 
 	for (;;) {
 		if (uart_upper.state == UART_STATE_RX_COMPLETE) {
-			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(PIN_INT_PORT, PIN_INT_PIN, GPIO_PIN_SET);
 			HAL_Delay(5U);
 			(void)HAL_UART_Transmit(uart_module.handle, uart_upper.rx_buf, uart_upper.rx_cnt, 0xFFFFU);
 			HAL_Delay(5U);
-			HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(PIN_INT_PORT, PIN_INT_PIN, GPIO_PIN_RESET);
 			uart_upper.rx_cnt = 0;
 			uart_upper.state = UART_STATE_IDLE;
 		}
@@ -158,15 +159,15 @@ static void APP_IntPinConfig(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-	__HAL_RCC_GPIOF_CLK_ENABLE();
+	PIN_INT_CLK_ENABLE();
 
-	GPIO_InitStruct.Pin = GPIO_PIN_1;
+	GPIO_InitStruct.Pin = PIN_INT_PIN;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
 
-	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
-	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_1, GPIO_PIN_RESET);
+	HAL_GPIO_Init(PIN_INT_PORT, &GPIO_InitStruct);
+	HAL_GPIO_WritePin(PIN_INT_PORT, PIN_INT_PIN, GPIO_PIN_RESET);
 }
 
 static void APP_RadarOutPinConfig(void)
