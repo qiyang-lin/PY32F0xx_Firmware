@@ -104,4 +104,23 @@ void USART2_IRQHandler(void)
 	APP_Usart2IRQCallback(USART2);
 }
 
+
+/**
+  * @brief This function handles EXTI0_1 global interrupt.
+  */
+void EXTI0_1_IRQHandler(void)
+{
+    /* 检查是否是 EXTI Line 1 触发的中断 */
+    if (__HAL_GPIO_EXTI_GET_IT(RADAR_WAKEUP_PIN) != RESET)
+    {
+        /* 清除 EXTI Line 1 的中断标志 */
+        __HAL_GPIO_EXTI_CLEAR_IT(RADAR_WAKEUP_PIN);
+        
+        /* 调用 GPIO EXTI 回调函数 */
+        HAL_GPIO_EXTI_Callback(RADAR_WAKEUP_PIN);
+    }
+}
+
+
+
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

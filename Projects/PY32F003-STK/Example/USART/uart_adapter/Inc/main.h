@@ -44,6 +44,10 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
+/* 雷达唤醒引脚定义 */
+#define RADAR_WAKEUP_PORT        	GPIOF
+#define RADAR_WAKEUP_PIN         	GPIO_PIN_1
+#define RADAR_WAKEUP_CLK_ENABLE() __HAL_RCC_GPIOF_CLK_ENABLE()
 /* Exported variables prototypes ---------------------------------------------*/
 extern UART_HandleTypeDef UartHandle;
 

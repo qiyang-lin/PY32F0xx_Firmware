@@ -58,11 +58,11 @@ static uint8_t uart_upper_rx_buf[RX_BUF_SIZE];
 static uint8_t uart_module_rx_buf[RX_BUF_SIZE];
 static volatile uart_ctx_t uart_upper;
 static volatile uart_ctx_t uart_module;
+static volatile uint8_t radar_ready_flag = 0; /* 标志位，指示radar_wakeup_host是否高电平 */
 
 /* Private user code ---------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
-
 /* Private function prototypes -----------------------------------------------*/
 
 static void APP_SystemClockConfig(void);
@@ -70,6 +70,8 @@ static void APP_IntPinConfig(void);
 static void APP_RadarOutPinConfig(void);
 static void APP_WakeupPinConfig(void);
 static void APP_UartInit(void);
+static void APP_ProcessRadarData(void);
+
 
 /**
  * @brief  应用程序入口函数.
@@ -100,11 +102,23 @@ int main(void)
 			uart_upper.state = UART_STATE_IDLE;
 		}
 		if (uart_module.state == UART_STATE_RX_COMPLETE) {
-			(void)HAL_UART_Transmit(uart_upper.handle, uart_module.rx_buf, uart_module.rx_cnt, 0xFFFFU);
-			uart_module.rx_cnt = 0;
-			uart_module.state = UART_STATE_IDLE;
-		}
+            APP_ProcessRadarData();
+        }
 	}
+}
+
+/**
+ * @brief  处理并转发雷达数据
+ * @param  None
+ * @retval None
+ */
+static void APP_ProcessRadarData(void)
+{
+    if (uart_module.rx_cnt > 0) {
+        (void)HAL_UART_Transmit(uart_upper.handle, uart_module.rx_buf, uart_module.rx_cnt, 0xFFFFU);
+        uart_module.rx_cnt = 0;
+    }
+    uart_module.state = UART_STATE_IDLE;
 }
 
 /**
@@ -115,6 +129,32 @@ int main(void)
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
 	printf("Uart Error, ErrorCode = %d\r\n", huart->ErrorCode);
+}
+
+/**
+ * @brief  GPIO EXTI 回调函数
+ * @param  GPIO_Pin: 指定连接到EXTI线的引脚
+ * @retval None
+ */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    if (GPIO_Pin == RADAR_WAKEUP_PIN) {
+        if (HAL_GPIO_ReadPin(RADAR_WAKEUP_PORT, RADAR_WAKEUP_PIN) == GPIO_PIN_SET) {
+            /* 检测到上升沿 - 雷达有数据要发送 */
+            radar_ready_flag = 1;
+            LL_USART_EnableIT_RXNE(USART2);  /* 启用USART2 RXNE中断 */
+        } else {
+            /* 检测到下降沿 - 雷达数据发送完毕 */
+            radar_ready_flag = 0;
+            LL_USART_DisableIT_RXNE(USART2); /* 禁用USART2 RXNE中断 */
+            
+            /* 如果有待处理的数据，立即处理 */
+            if (uart_module.state == UART_STATE_BUSY_RX && uart_module.rx_cnt > 0) {
+                uart_module.state = UART_STATE_RX_COMPLETE;
+                APP_ProcessRadarData();
+            }
+        }
+    }
 }
 
 /**
@@ -186,16 +226,31 @@ static void APP_RadarOutPinConfig(void)
 
 static void APP_WakeupPinConfig(void)
 {
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
+	
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-	__HAL_RCC_GPIOF_CLK_ENABLE();
+	RADAR_WAKEUP_CLK_ENABLE();
 
+	/* 配置PF0 */
 	GPIO_InitStruct.Pin = GPIO_PIN_0;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+	
+	/* 配置PF1（radar_wakeup_host）为中断引脚 */
+	GPIO_InitStruct.Pin = RADAR_WAKEUP_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING; /* 检测上升沿和下降沿 */
+	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	HAL_GPIO_Init(RADAR_WAKEUP_PORT, &GPIO_InitStruct);
+	
+	/* 启用并设置EXTI中断优先级 */
+	HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+	
+	/* 根据当前引脚状态初始化radar_data_ready标志 */
+	radar_ready_flag = (HAL_GPIO_ReadPin(RADAR_WAKEUP_PORT, RADAR_WAKEUP_PIN) == GPIO_PIN_SET) ? 1 : 0;
 }
 
 static void uart_upper_init(void)
@@ -224,26 +279,31 @@ static void uart_upper_init(void)
 
 static void uart_module_init(void)
 {
-	uart_module.handle = &uart_module_handle;
-	uart_module.rx_buf = uart_module_rx_buf;
-	uart_module.state = UART_STATE_IDLE;
-	uart_module.rx_cnt = 0;
+	  uart_module.handle = &uart_module_handle;
+    uart_module.rx_buf = uart_module_rx_buf;
+    uart_module.state = UART_STATE_IDLE;
+    uart_module.rx_cnt = 0;
 
-	uart_module_handle.Instance = USART2;
-	uart_module_handle.Init.BaudRate = 921600;
-	uart_module_handle.Init.WordLength = UART_WORDLENGTH_8B;
-	uart_module_handle.Init.StopBits = UART_STOPBITS_1;
-	uart_module_handle.Init.Parity = UART_PARITY_NONE;
-	uart_module_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	uart_module_handle.Init.Mode = UART_MODE_TX_RX;
-	uart_module_handle.Init.OverSampling = UART_OVERSAMPLING_16;
-	uart_module_handle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-	if (HAL_UART_Init(&uart_module_handle) != HAL_OK) {
-		APP_ErrorHandler();
-	}
+    uart_module_handle.Instance = USART2;
+    uart_module_handle.Init.BaudRate = 921600;
+    uart_module_handle.Init.WordLength = UART_WORDLENGTH_8B;
+    uart_module_handle.Init.StopBits = UART_STOPBITS_1;
+    uart_module_handle.Init.Parity = UART_PARITY_NONE;
+    uart_module_handle.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    uart_module_handle.Init.Mode = UART_MODE_TX_RX;
+    uart_module_handle.Init.OverSampling = UART_OVERSAMPLING_16;
+    uart_module_handle.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+    if (HAL_UART_Init(&uart_module_handle) != HAL_OK) {
+        APP_ErrorHandler();
+    }
 
-	LL_USART_EnableIT_RXNE(USART2);
-	LL_USART_EnableIT_IDLE(USART2);
+    /* 初始化时禁用USART2的RXNE中断，直到radar_wakeup_host为高电平 */
+    LL_USART_EnableIT_IDLE(USART2);
+    if (radar_ready_flag) {
+        LL_USART_EnableIT_RXNE(USART2);
+    } else {
+        LL_USART_DisableIT_RXNE(USART2);
+    }
 }
 
 static void APP_UartInit(void)
@@ -272,15 +332,19 @@ void APP_Usart1IRQCallback(USART_TypeDef *USARTx)
 
 void APP_Usart2IRQCallback(USART_TypeDef *USARTx)
 {
-	if ((LL_USART_IsActiveFlag_RXNE(USARTx) != RESET) && (LL_USART_IsEnabledIT_RXNE(USARTx) != RESET)) {
-		uart_module.rx_buf[uart_module.rx_cnt] = LL_USART_ReceiveData8(USARTx);
-		uart_module.rx_cnt++;
-		uart_module.state = UART_STATE_BUSY_RX;
-	}
-	if ((LL_USART_IsActiveFlag_IDLE(USARTx) != RESET) && (LL_USART_IsEnabledIT_IDLE(USARTx) != RESET)) {
-		LL_USART_ClearFlag_IDLE(USARTx);
-		uart_module.state = UART_STATE_RX_COMPLETE;
-	}
+	    /* 仅在radar_wakeup_host为高电平时处理RXNE中断 */
+    if ((LL_USART_IsActiveFlag_RXNE(USARTx) != RESET) && (LL_USART_IsEnabledIT_RXNE(USARTx) != RESET) && radar_ready_flag) {
+        uart_module.rx_buf[uart_module.rx_cnt] = LL_USART_ReceiveData8(USARTx);
+        uart_module.rx_cnt++;
+        uart_module.state = UART_STATE_BUSY_RX;
+    }
+    if ((LL_USART_IsActiveFlag_IDLE(USARTx) != RESET) && (LL_USART_IsEnabledIT_IDLE(USARTx) != RESET)) {
+        LL_USART_ClearFlag_IDLE(USARTx);
+        /* 仅在有数据时标记为完成 */
+        if (uart_module.rx_cnt > 0) {
+            uart_module.state = UART_STATE_RX_COMPLETE;
+        }
+    }
 }
 
 /**
